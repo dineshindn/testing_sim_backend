@@ -1,7 +1,7 @@
 CONFIG = {
   development: {
     user: "root",
-    password: "mysql",
+    password: "admin",
     database: "sim_manager_development",
     host: "localhost",
     port: 3306,
@@ -9,7 +9,7 @@ CONFIG = {
   },
   test: {
     user: "root",
-    password: "mysql",
+    password: "admin",
     database: "sim_manager_test",
     host: "localhost",
     port: 3306,
