@@ -1,8 +1,8 @@
 {
-  "name": "sim-manager-backend",
+  "name": "simmanager_backend",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "",
+  "repository": "https://gitlab.com/newslatelabs/simmanager_backend",
   "author": "Krishna <krishna@nyl.technology>",
   "license": "MIT",
   "scripts": {
