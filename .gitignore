@@ -1,0 +1,10 @@
+# Ignoring node_modules folder
+node_modules
+# Ignoring SQL Scripts 
+create_tables.sql
+# Ignoring Log files
+/logs
+ 
+*.pem
+
+.env
