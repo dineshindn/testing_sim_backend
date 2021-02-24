@@ -5,8 +5,9 @@ module.exports = (app) => {
     message: 'Ok',
   }));
 
+  //users
   app.get('/api/v1/users', users.list);
   app.post('/api/v1/users', users.create);
-  app.delete('/api/v1/users', users.create);
+  app.delete('/api/v1/users', users.delete);
 
 };
