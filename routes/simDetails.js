@@ -41,9 +41,30 @@ module.exports = {
     }
   },
 
+  async getSimDetailsById(req, res) {
+    let _q = req && req.query ? req.query : "";
+    let value;
+    let query;
+    if (_q && _q.id) {
+      query = "SELECT * FROM `simDetails` WHERE id=?";
+      value = _q.id;
+    } else if (_q && _q.simNumber) {
+      query = "SELECT * FROM `simDetails` WHERE simNumber=?";
+      value = _q.simNumber;
+    }
+    try {
+      const result = await executeQuery(query, [value]);
+      return res.status(200).send({ data: result });
+    } catch (err) {
+      return res.status(500).send({ error: err });
+    }
+  },
+
   async delete(req, res) {
     try {
-      await executeQuery("DELETE FROM `simDetails` WHERE id=?", [req.params.id]);
+      await executeQuery("DELETE FROM `simDetails` WHERE id=?", [
+        req.query.id
+      ]);
       return res.status(200).send({ message: "Sim deleted Successfully" });
     } catch (err) {
       return res.status(500).send({ error: err });
