@@ -17,6 +17,7 @@ module.exports = (app) => {
   app.get("/simmanager/api/v1/simDetails", simDetails.list);
   app.post("/simmanager/api/v1/simDetails", simDetails.create);
   app.delete("/simmanager/api/v1/simDetails", simDetails.delete);
+  app.patch("/simmanager/api/v1/simDetails", simDetails.update);
   app.post("/simmanager/api/v1/getSimDetailsById", simDetails.getSimDetailsById);
 
 };
