@@ -28,7 +28,7 @@ module.exports = {
         ]
       );
 
-      return res.status(200).send({ data: { id: result.insertId } });
+      return res.status(200).send({ message: 'Created successfully', data: { id: result.insertId } });
     } catch (err) {
       console.log(err);
       return res.status(400).send({ error: err.sqlMessage });
@@ -60,7 +60,7 @@ module.exports = {
       let updateQuery = `UPDATE simDetails` + setClause + " WHERE id=?";
       values.push(sim.id)
       const result = await executeQuery(updateQuery, values);
-      return res.status(200).send({ data: result });
+      return res.status(200).send({ message: 'Updated successfully',  data: {id: sim.id} });
     } catch (err) {
       console.log(err);
       return res.status(400).send({ error: err.sqlMessage });
@@ -97,7 +97,7 @@ module.exports = {
   async delete(req, res) {
     try {
       await executeQuery("DELETE FROM `simDetails` WHERE id=?", [req.query.id]);
-      return res.status(200).send({ message: "Sim deleted Successfully" });
+      return res.status(200).send({ message: "Deleted Successfully" });
     } catch (err) {
       return res.status(500).send({ error: err });
     }
