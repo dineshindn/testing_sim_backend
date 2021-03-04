@@ -1,5 +1,8 @@
 const users = require("./users");
 const simDetails = require("./simDetails");
+const oem = require("./oem");
+const networkProvider = require("./networkProvider");
+const status = require("./status");
 
 module.exports = (app) => {
   app.get("/api/v1/health-check", (req, res) =>
@@ -20,4 +23,12 @@ module.exports = (app) => {
   app.patch("/simmanager/api/v1/simDetails", simDetails.update);
   app.post("/simmanager/api/v1/getSimDetailsById", simDetails.getSimDetailsById);
 
+  //oem
+  app.get("/simmanager/api/v1/oem", oem.list);
+
+  //networkProvider
+  app.get("/simmanager/api/v1/networkProvider", networkProvider.list);
+
+  //status
+  app.get("/simmanager/api/v1/status", status.list);
 };
