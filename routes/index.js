@@ -28,7 +28,9 @@ module.exports = (app) => {
 
   //networkProvider
   app.get("/simmanager/api/v1/networkProvider", networkProvider.list);
+  app.patch("/simmanager/api/v1/networkProvider", networkProvider.update);
 
   //status
+  app.post("/simmanager/api/v1/status", users.create);
   app.get("/simmanager/api/v1/status", status.list);
 };

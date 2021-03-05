@@ -23,8 +23,8 @@ module.exports = {
           req.body.fk_status,
           req.body.stateChangeDate,
           req.body.dispatchDate,
-          req.body.insertUTC,
-          req.body.updateUTC,
+          new Date(),
+          new Date()
         ]
       );
 
@@ -54,10 +54,13 @@ module.exports = {
     ];
     try {
       let { setClause, values } = await formSetClause(req.body, whiteListedColumns);
+      setClause +=', updateUTC=?';
+
       const sim = (await executeQuery("SELECT id from simDetails WHERE id=?", [req.query.id]))[0];
       if (!sim) return res.status(404).send({ error: "Record not found" });
 
       let updateQuery = `UPDATE simDetails` + setClause + " WHERE id=?";
+      values.push(new Date());
       values.push(sim.id)
       const result = await executeQuery(updateQuery, values);
       return res.status(200).send({ message: 'Updated successfully',  data: {id: sim.id} });
