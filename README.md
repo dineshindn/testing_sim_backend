@@ -31,7 +31,7 @@ Clone the project and then make sure to do the following steps to start the back
 
 
 ## Example insert query
-1. `INSERT INTO networkProvider (name, updateUTC) VALUES ('airtel');`
+1. `INSERT INTO networkProvider (name) VALUES ('airtel');`
 2. `INSERT INTO status (name, description) VALUES ('pending', 'request pending');`
 3. `INSERT INTO oem (name) VALUES ('Ashok Leyland');`
 

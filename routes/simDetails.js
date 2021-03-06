@@ -69,10 +69,24 @@ module.exports = {
       return res.status(400).send({ error: err.sqlMessage });
     }
   },
+  
   async list(req, res) {
     try {
-      const result = await executeQuery("SELECT * FROM `simDetails`");
-      return res.status(200).send({ data: result });
+      const limit = req && req.query && req.query.limit ? req.query.limit : 10;
+      const page = req && req.query && req.query.page ? req.query.page : 1;
+      var offset;
+      offset = (page - 1) * limit;
+      offset = Number.isNaN(offset) ? 0 : offset;
+      let sql = `SELECT * FROM simDetails limit ` + limit + ` offset ` + offset;
+      const result = await executeQuery(sql);
+      const totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`)
+      const responseJson = {
+        'totalCount': totalRecords,
+        'pageCount': result.length,
+        'pageNumber': page,
+        'data': result
+      }
+      return res.status(200).send(responseJson);
     } catch (err) {
       return res.status(500).send({ error: err });
     }
