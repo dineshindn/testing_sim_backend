@@ -93,17 +93,23 @@ module.exports = {
   },
 
   async getSimDetailsById(req, res) {
-    let _q = req && req.query ? req.query : "";
-    let value;
-    let query;
-    if (_q && _q.id) {
-      query = "SELECT * FROM `simDetails` WHERE id=?";
-      value = _q.id;
-    } else if (_q && _q.simNumber) {
-      query = "SELECT * FROM `simDetails` WHERE simNumber=?";
-      value = _q.simNumber;
-    }
     try {
+      let _q = req && req.query ? req.query : {};
+      let value;
+      let query;
+      if (_q && Object.keys(_q).length === 0 && _q.constructor === Object) {
+        return res.send({ message: 'Invalid query' })
+      }
+      if (_q.id) {
+        query = "SELECT * FROM `simDetails` WHERE id=?";
+        value = _q.id;
+      } else if (_q.simNumber) {
+        query = "SELECT * FROM `simDetails` WHERE simNumber=?";
+        value = _q.simNumber;
+      } else if (_q.deviceId) {
+        query = "SELECT * FROM `simDetails` WHERE deviceId=?";
+        value = _q.deviceId;
+      }
       const result = await executeQuery(query, [value]);
       return res.status(200).send({ data: result });
     } catch (err) {
