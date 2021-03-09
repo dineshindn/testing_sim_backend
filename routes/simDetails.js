@@ -129,4 +129,33 @@ module.exports = {
       return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
+
+  async simStateChange(req, res) {
+    try {
+      const { simId, fk_subscriptionStatus } = req.body ? req.body : {};
+      if (simId && fk_subscriptionStatus) {
+        const result = await executeQuery(
+          "INSERT INTO status (name, description, insertUTC, updateUTC) VALUES (?, ?, ?, ?)",
+          [
+            fk_subscriptionStatus,
+            fk_subscriptionStatus,
+            new Date(),
+            new Date()
+          ]
+        );
+        await executeQuery(
+          "UPDATE simDetails SET fk_subscriptionStatus=?, updateUTC=? WHERE id=?;",
+          [
+            result.insertId,
+            new Date(),
+            simId
+          ]
+        );
+        return res.status(200).send({ message: 'Success', reason: 'state changed' });
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(400).send({ error: "Something went wrong" });
+    }
+  }
 };
