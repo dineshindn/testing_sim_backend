@@ -79,9 +79,9 @@ module.exports = {
       offset = Number.isNaN(offset) ? 0 : offset;
       let sql = `SELECT * FROM simDetails limit ` + limit + ` offset ` + offset;
       const result = await executeQuery(sql);
-      const totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`)
+      const totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
       const responseJson = {
-        'totalCount': totalRecords,
+        'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
         'pageCount': result.length,
         'pageNumber': page,
         'data': result
