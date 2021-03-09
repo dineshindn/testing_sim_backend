@@ -61,7 +61,7 @@ module.exports = {
 
       let updateQuery = `UPDATE simDetails` + setClause + " WHERE id=?";
       values.push(new Date());
-      values.push(sim.id)
+      values.push(sim.id);
       const result = await executeQuery(updateQuery, values);
       return res.status(200).send({ message: 'Updated successfully',  data: {id: sim.id} });
     } catch (err) {
@@ -109,6 +109,9 @@ module.exports = {
       } else if (_q.deviceId) {
         query = "SELECT * FROM `simDetails` WHERE deviceId=?";
         value = _q.deviceId;
+      } else if (_q.mobileNumber) {
+        query = "SELECT * FROM `simDetails` WHERE mobileNumber=?";
+        value = _q.mobileNumber;
       }
       const result = await executeQuery(query, [value]);
       return res.status(200).send({ data: result });
