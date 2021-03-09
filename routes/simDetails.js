@@ -28,10 +28,10 @@ module.exports = {
         ]
       );
 
-      return res.status(200).send({ message: 'Created successfully', data: { id: result.insertId } });
+      return res.send({ status: 200, message: 'success', reason: 'Created Successfully' ,result: { id: result.insertId } });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ error: err.sqlMessage });
+      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
 
@@ -63,10 +63,10 @@ module.exports = {
       values.push(new Date());
       values.push(sim.id);
       const result = await executeQuery(updateQuery, values);
-      return res.status(200).send({ message: 'Updated successfully',  data: {id: sim.id} });
+      return res.send({ status: 200, message: 'success', reason: 'updated successfully' ,result: { id: sim.id } });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ error: err.sqlMessage });
+      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
   
@@ -86,9 +86,9 @@ module.exports = {
         'pageNumber': page,
         'data': result
       }
-      return res.status(200).send(responseJson);
+      return res.send({ status: 200, message: 'success' ,result: responseJson });
     } catch (err) {
-      return res.status(500).send({ error: err });
+      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
 
@@ -114,18 +114,19 @@ module.exports = {
         value = _q.mobileNumber;
       }
       const result = await executeQuery(query, [value]);
-      return res.status(200).send({ data: result });
+      return res.send({ status: 200, message: 'success' ,result: result });
     } catch (err) {
-      return res.status(500).send({ error: err });
+      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
 
   async delete(req, res) {
     try {
-      await executeQuery("DELETE FROM `simDetails` WHERE id=?", [req.query.id]);
-      return res.status(200).send({ message: "Deleted Successfully" });
+      let recordId = req && req.query && req.query.id ? req.query.id : '';
+      await executeQuery("DELETE FROM `simDetails` WHERE id=?", [recordId]);
+      return res.send({ status: 200, message: 'success', reason: 'Deleted successfully', result: { id: recordId } });
     } catch (err) {
-      return res.status(500).send({ error: err });
+      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
 };
