@@ -151,7 +151,7 @@ module.exports = {
             simId
           ]
         );
-        return res.status(200).send({ message: 'Success', reason: 'state changed' });
+        return res.send({ status: 200, message: 'Success', reason: 'state changed' });
       }
     } catch (err) {
       console.log(err);
