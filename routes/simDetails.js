@@ -134,19 +134,26 @@ module.exports = {
     try {
       const { simId, fk_subscriptionStatus } = req.body ? req.body : {};
       if (simId && fk_subscriptionStatus) {
-        const result = await executeQuery(
-          "INSERT INTO status (name, description, insertUTC, updateUTC) VALUES (?, ?, ?, ?)",
-          [
-            fk_subscriptionStatus,
-            fk_subscriptionStatus,
-            new Date(),
-            new Date()
-          ]
-        );
+        let statusId;
+        const recordExists = (await executeQuery("SELECT * from status WHERE name=?", [fk_subscriptionStatus]))[0];
+        if (recordExists && recordExists.id) {
+          statusId = recordExists.id;
+        } else {
+          const result = await executeQuery(
+            "INSERT INTO status (name, description, insertUTC, updateUTC) VALUES (?, ?, ?, ?)",
+            [
+              fk_subscriptionStatus,
+              fk_subscriptionStatus,
+              new Date(),
+              new Date()
+            ]
+          );
+          statusId = result.insertId
+        }
         await executeQuery(
           "UPDATE simDetails SET fk_subscriptionStatus=?, updateUTC=? WHERE id=?;",
           [
-            result.insertId,
+            statusId,
             new Date(),
             simId
           ]
