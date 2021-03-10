@@ -3,6 +3,7 @@ const simDetails = require("./simDetails");
 const oem = require("./oem");
 const networkProvider = require("./networkProvider");
 const status = require("./status");
+const stats = require("./stats");
 
 module.exports = (app) => {
   app.get("/api/v1/health-check", (req, res) =>
@@ -34,4 +35,11 @@ module.exports = (app) => {
   //status
   //app.post("/simmanager/api/v1/status", users.create);
   app.get("/simmanager/api/v1/status", status.list);
+  // app.delete("/simmanager/api/v1/status", status.delete);
+  // app.get("/simmanager/api/v1/deleteAllStatus", status.deleteAllStatus);
+
+  //stats
+  app.get("/simmanager/api/v1/stats/getSimStateDetails", stats.getSimStateCount);
+
+
 };
