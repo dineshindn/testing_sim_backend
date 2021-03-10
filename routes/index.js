@@ -39,7 +39,7 @@ module.exports = (app) => {
   // app.get("/simmanager/api/v1/deleteAllStatus", status.deleteAllStatus);
 
   //stats
-  app.get("/simmanager/api/v1/stats/getSimStateDetails", stats.getSimStateCount);
+  app.get("/simmanager/api/v1/stats/getSimStateCount", stats.getSimStateCount);
 
 
 };
