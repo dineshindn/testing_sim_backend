@@ -22,7 +22,7 @@ module.exports = (app) => {
   app.post("/simmanager/api/v1/simDetails", simDetails.create);
   app.delete("/simmanager/api/v1/simDetails", simDetails.delete);
   app.patch("/simmanager/api/v1/simDetails", simDetails.update);
-  app.post("/simmanager/api/v1/getSimDetailsById", simDetails.getSimDetailsById);
+  app.get("/simmanager/api/v1/getSimDetailsById", simDetails.getSimDetailsById);
   app.post("/simmanager/api/v1/simStateChange", simDetails.simStateChange);
 
   //oem
