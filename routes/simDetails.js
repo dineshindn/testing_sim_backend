@@ -132,23 +132,11 @@ module.exports = {
 
   async simStateChange(req, res) {
     try {
-      const { simId, fk_subscriptionStatus } = req.body ? req.body : {};
-      if (simId && fk_subscriptionStatus) {
-        let statusId;
-        const recordExists = (await executeQuery("SELECT * from status WHERE name=?", [fk_subscriptionStatus]))[0];
-        if (recordExists && recordExists.id) {
-          statusId = recordExists.id;
-        } else {
-          const result = await executeQuery(
-            "INSERT INTO status (name, description, insertUTC, updateUTC) VALUES (?, ?, ?, ?)",
-            [
-              fk_subscriptionStatus,
-              fk_subscriptionStatus,
-              new Date(),
-              new Date()
-            ]
-          );
-          statusId = result.insertId
+      const { simId, statusId } = req.body ? req.body : {};
+      if (simId && statusId) {
+        const recordExists = (await executeQuery("SELECT * from status WHERE id=?", [statusId]))[0];
+        if (!recordExists) {
+          return res.send({ status: 400, message: 'failure', reason: "Status Id error" });
         }
         await executeQuery(
           "UPDATE simDetails SET fk_subscriptionStatus=?, updateUTC=? WHERE id=?;",
@@ -159,6 +147,8 @@ module.exports = {
           ]
         );
         return res.send({ status: 200, message: 'Success', reason: 'state changed' });
+      } else {
+        return res.send({ status: 400, message: 'failure', reason: "Invalid post data" });
       }
     } catch (err) {
       console.log(err);
