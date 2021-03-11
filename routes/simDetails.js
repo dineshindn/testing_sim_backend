@@ -139,7 +139,7 @@ module.exports = {
           return res.send({ status: 400, message: 'failure', reason: "Status Id error" });
         }
         await executeQuery(
-          "UPDATE simDetails SET fk_subscriptionStatus=?, updateUTC=? WHERE id=?;",
+          "UPDATE simDetails SET fk_status=?, updateUTC=? WHERE id=?;",
           [
             statusId,
             new Date(),
