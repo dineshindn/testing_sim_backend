@@ -32,7 +32,9 @@ Clone the project and then make sure to do the following steps to start the back
 
 ## Example insert query
 1. `INSERT INTO networkProvider (name) VALUES ('airtel');`
-2. `INSERT INTO status (name, description) VALUES ('pending', 'request pending');`
-3. `INSERT INTO oem (name) VALUES ('Ashok Leyland');`
+2. `INSERT INTO status (id, name, description) VALUES ('1', 'Active', 'active');`
+3. `INSERT INTO status (id, name, description) VALUES ('2', 'Suspended', 'suspended');`
+4. `INSERT INTO status (id, name, description) VALUES ('3', 'Deactivated', 'deactivated');`
+5. `INSERT INTO oem (id, name, description) VALUES ('1', 'Ashok Leyland', 'client company');`
 
 ### Happy Coding !
