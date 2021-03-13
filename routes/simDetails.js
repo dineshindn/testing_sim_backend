@@ -72,13 +72,29 @@ module.exports = {
   
   async list(req, res) {
     try {
+      const { simNumber, deviceId, mobileNumber } = req && req.query ? req.query : {};
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
       var offset;
       offset = (page - 1) * limit;
       offset = Number.isNaN(offset) ? 0 : offset;
-      let sql = `SELECT * FROM simDetails limit ` + limit + ` offset ` + offset;
-      const result = await executeQuery(sql);
+      let value;
+      let query;
+      if (simNumber || deviceId || mobileNumber) {
+        if (simNumber) {
+          query = `SELECT * FROM simDetails WHERE simNumber REGEXP ${simNumber} limit ${limit} offset ${offset};`;
+          value = simNumber;
+        } else if (deviceId) {
+          query = `SELECT * FROM simDetails WHERE deviceId REGEXP ${deviceId} limit ${limit} offset ${offset};`;
+          value = deviceId;
+        } else if (mobileNumber) {
+          query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP ${mobileNumber} limit ${limit} offset ${offset};`;
+          value = mobileNumber;
+        }
+      } else {
+        query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`;
+      }
+      const result = await executeQuery(query, [value]);
       const totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
       const responseJson = {
         'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
@@ -86,7 +102,7 @@ module.exports = {
         'pageNumber': page,
         'data': result
       }
-      return res.send({ status: 200, message: 'success' ,result: responseJson });
+      return res.send({ status: 200, message: 'success', result: responseJson });
     } catch (err) {
       return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
@@ -94,27 +110,17 @@ module.exports = {
 
   async getSimDetailsById(req, res) {
     try {
-      let _q = req && req.query ? req.query : {};
+      let _id = req && req.query && req.query.id ? req.query.id : '';
       let value;
       let query;
-      if (_q && Object.keys(_q).length === 0 && _q.constructor === Object) {
-        return res.send({ message: 'Invalid query' })
-      }
-      if (_q.id) {
-        query = `SELECT * FROM simDetails WHERE id REGEXP ${_q.id}`;
-        value = _q.id;
-      } else if (_q.simNumber) {
-        query = `SELECT * FROM simDetails WHERE simNumber REGEXP ${_q.simNumber}`;
-        value = _q.simNumber;
-      } else if (_q.deviceId) {
-        query = `SELECT * FROM simDetails WHERE deviceId REGEXP ${_q.deviceId}`;
-        value = _q.deviceId;
-      } else if (_q.mobileNumber) {
-        query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP ${_q.mobileNumber}`;
-        value = _q.mobileNumber;
+      if (_id) {
+        query = `SELECT * FROM simDetails WHERE id=?;`;
+        value = _id;
+      } else {
+        return res.send({ status: 400, message: 'failure', reason: 'Invalid query', result: { error: err.message } });
       }
       const result = await executeQuery(query, [value]);
-      return res.send({ status: 200, message: 'success' ,result: result });
+      return res.send({ status: 200, message: 'success', result: result });
     } catch (err) {
       return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
