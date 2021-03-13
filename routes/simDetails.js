@@ -101,16 +101,16 @@ module.exports = {
         return res.send({ message: 'Invalid query' })
       }
       if (_q.id) {
-        query = "SELECT * FROM `simDetails` WHERE id=?";
+        query = `SELECT * FROM simDetails WHERE id REGEXP ${_q.id}`;
         value = _q.id;
       } else if (_q.simNumber) {
-        query = "SELECT * FROM `simDetails` WHERE simNumber=?";
+        query = `SELECT * FROM simDetails WHERE simNumber REGEXP ${_q.simNumber}`;
         value = _q.simNumber;
       } else if (_q.deviceId) {
-        query = "SELECT * FROM `simDetails` WHERE deviceId=?";
+        query = `SELECT * FROM simDetails WHERE deviceId REGEXP ${_q.deviceId}`;
         value = _q.deviceId;
       } else if (_q.mobileNumber) {
-        query = "SELECT * FROM `simDetails` WHERE mobileNumber=?";
+        query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP ${_q.mobileNumber}`;
         value = _q.mobileNumber;
       }
       const result = await executeQuery(query, [value]);
