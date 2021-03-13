@@ -40,6 +40,8 @@ module.exports = (app) => {
 
   //stats
   app.get("/simmanager/api/v1/stats/getSimStateCount", stats.getSimStateCount);
+  app.get("/simmanager/api/v1/stats/getProviderCount", stats.getProviderCount);
+  app.get("/simmanager/api/v1/stats/getOemCount", stats.getOemCount);
 
 
 };
