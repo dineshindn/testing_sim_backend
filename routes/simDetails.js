@@ -7,7 +7,7 @@ module.exports = {
   async create(req, res) {
     try {
       const result = await executeQuery(
-        "INSERT INTO simDetails (deviceId, simNumber, deviceSerialNumber, imeiNumber, fk_networkProviderId, fk_oem, vinMsnNumber, registrationNumber, fk_subscriptionStatus, subscriptionEndDate, mobileNumber, fk_status, stateChangeDate, dispatchDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO simDetails (deviceId, simNumber, deviceSerialNumber, imeiNumber, fk_networkProviderId, fk_oem, vinMsnNumber, registrationNumber, subscriptionStatus, subscriptionEndDate, mobileNumber, fk_status, stateChangeDate, dispatchDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           req.body.deviceId,
           req.body.simNumber,
@@ -17,7 +17,7 @@ module.exports = {
           req.body.fk_oem,
           req.body.vinMsnNumber,
           req.body.registrationNumber,
-          req.body.fk_subscriptionStatus,
+          req.body.subscriptionStatus,
           req.body.subscriptionEndDate,
           req.body.mobileNumber,
           req.body.fk_status,
