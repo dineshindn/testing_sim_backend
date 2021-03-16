@@ -72,7 +72,7 @@ module.exports = {
   
   async list(req, res) {
     try {
-      const { simNumber, deviceId, mobileNumber } = req && req.query ? req.query : {};
+      const { simNumber, deviceId, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem , stateChangeDate, dispatchDate, statusId} = req && req.query ? req.query : {};
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
       var offset;
@@ -80,7 +80,7 @@ module.exports = {
       offset = Number.isNaN(offset) ? 0 : offset;
       let value;
       let query;
-      if (simNumber || deviceId || mobileNumber) {
+      if (simNumber || deviceId || mobileNumber || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || dispatchDate || statusId != 'ALL') {
         if (simNumber) {
           query = `SELECT * FROM simDetails WHERE simNumber REGEXP ${simNumber} limit ${limit} offset ${offset};`;
           value = simNumber;
@@ -90,6 +90,29 @@ module.exports = {
         } else if (mobileNumber) {
           query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP ${mobileNumber} limit ${limit} offset ${offset};`;
           value = mobileNumber;
+        } else if (networkProviderId) {
+          query = `SELECT * FROM simDetails WHERE networkProviderId REGEXP ${networkProviderId} limit ${limit} offset ${offset};`;
+          value = networkProviderId;
+        } else if (networkProvider) {
+          const networkId = (await executeQuery(`SELECT id FROM networkProvider WHERE name=?`, [networkProvider]))[0]
+          query = `SELECT * FROM simDetails WHERE fk_networkProviderId REGEXP ${networkId.id} limit ${limit} offset ${offset};`;
+          value = networkId.id;
+        } else if (oem) {
+          const oemId = (await executeQuery(`SELECT id FROM oem WHERE name=?`, [oem]))[0]
+          query = `SELECT * FROM simDetails WHERE fk_oem REGEXP ${oemId.id} limit ${limit} offset ${offset};`;
+          value = oemId.id;
+        } else if (imeiNumber) {
+          query = `SELECT * FROM simDetails WHERE imeiNumber REGEXP ${imeiNumber} limit ${limit} offset ${offset};`;
+          value = imeiNumber;
+        } else if (statusId) {
+          query = `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset}`;
+          value = statusId;
+        }else if (stateChangeDate) {
+          query = `SELECT * FROM simDetails WHERE stateChangeDate=?`;
+          value = stateChangeDate;
+        } else if (dispatchDate) {
+          query = `SELECT * FROM simDetails WHERE dispatchDate=? limit ${limit} offset ${offset}`;
+          value = dispatchDate;
         }
       } else {
         query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`;
