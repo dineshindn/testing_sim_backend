@@ -27,8 +27,8 @@ module.exports = {
           new Date()
         ]
       );
-
-      return res.send({ status: 200, message: 'success', reason: 'Created Successfully' ,result: { id: result.insertId } });
+      const sim = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [result.insertId]))[0];
+      return res.send({ status: 200, message: 'success', reason: 'Created Successfully' ,result: { id: result.insertId, deviceId: sim.deviceId } });
     } catch (err) {
       console.log(err);
       return res.send({ status: 400, message: 'failure', result: { error: err.message } });
@@ -56,14 +56,14 @@ module.exports = {
       let { setClause, values } = await formSetClause(req.body, whiteListedColumns);
       setClause +=', updateUTC=?';
 
-      const sim = (await executeQuery("SELECT id from simDetails WHERE id=?", [req.query.id]))[0];
-      if (!sim) return res.status(404).send({ error: "Record not found" });
+      const sim = (await executeQuery("SELECT * from simDetails WHERE id=?", [req.query.id]));
+      if (sim && sim.length === 0) return res.status(404).send({ error: "Record not found" });
 
       let updateQuery = `UPDATE simDetails` + setClause + " WHERE id=?";
       values.push(new Date());
       values.push(sim.id);
       const result = await executeQuery(updateQuery, values);
-      return res.send({ status: 200, message: 'success', reason: 'updated successfully' ,result: { id: sim.id } });
+      return res.send({ status: 200, message: 'success', reason: 'updated successfully' ,result: { id: sim[0].id, deviceId:sim[0].deviceId} });
     } catch (err) {
       console.log(err);
       return res.send({ status: 400, message: 'failure', result: { error: err.message } });
