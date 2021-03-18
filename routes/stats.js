@@ -1,5 +1,6 @@
 const executeQuery = require("../database");
 var async = require('async');
+var _ = require('lodash');
 
 
 module.exports = {
@@ -71,10 +72,27 @@ module.exports = {
     }
     async function getProviderReport(id, providerName, next) {
       try {
-        let obj = {};
+        let obj = {
+          active: 0,
+          suspended: 0,
+          deactivated: 0
+        };
+        let active = 0;
+        let deactive = 0;
+        let suspend = 0;
         const resp = await executeQuery(`SELECT COUNT(*) AS providerCount FROM simDetails WHERE fk_networkProviderId=?;`, [id]);
+        const data = await executeQuery(`SELECT * FROM simDetails WHERE fk_networkProviderId=?;`, [id]);
         obj['networkProvider'] = providerName;
         obj['count'] = resp[0].providerCount;
+        _.findIndex(data, function (o) {
+          if (o.fk_status === 1) {
+            obj['active'] = ++active;
+          } else if (o.fk_status === 2) {
+            obj['suspended'] = ++suspend;
+          } else if (o.fk_status === 3) {
+            obj['deactivated'] = ++deactive;
+          }
+        });
         finalData.push(obj);
         next();
       } catch (_err) {
