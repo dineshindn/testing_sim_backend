@@ -4,7 +4,9 @@ node_modules
 create_tables.sql
 # Ignoring Log files
 /logs
- 
+# uploaded files
+uploads/*.xls
+uploads/*.xlsx
 *.pem
 
 .env

@@ -2,9 +2,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const morgan = require('morgan');
+const fileUpload = require('express-fileupload');
 const json2xls = require('json2xls');
 const path = require('path');
 const app = express();
+require('dotenv').config()
 
 // Allow files in public folder
 app.use('/api/v1/static', express.static(path.join(__dirname, 'public')));
@@ -23,6 +25,8 @@ app.use(bodyParser.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// file upload
+app.use(fileUpload());
 // Request logger
 app.use(morgan('dev'));
 // JSON to Excel converter
