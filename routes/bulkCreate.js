@@ -12,6 +12,7 @@ const getVinDetailsUrl = process.env.GET_VIN_DETAILS_URL
 
 console.log("-----authTOken=====", authTokenUrl)
 const fetchVinDetails = async (vin, uid, clientID) => {
+  console.log("=======inside getting fetchVIn details function======")
   try {
     let headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -75,6 +76,7 @@ const insertIntoSimTable = async (data, next) => {
 }
 module.exports = {
   async simBulkUpload(req, res) {
+    console.log("====initiating====",req.body)
     try {
       if (!req.files || (req.files && !req.files.file)) return res.send({ status: 400, message: 'failure', reason: 'File Missing' });
       if (!req.body.uid) return res.send({ status: 400, message: 'failure', reason: 'Missing uid value' });
@@ -88,11 +90,12 @@ module.exports = {
 
       const allVinDetails = await fetchVinDetails(
         rows.map(t => t.vinMsnNumber.toString()).filter((x, i, a) => a.indexOf(x) === i), req.body.uid, req.body.clientID);
+        
+console.log("-------all vin details=====",allVinDetails)
       if (allVinDetails) {
         const allStatus = await executeQuery("SELECT * from status;");
         const allOem = await executeQuery("SELECT * from oem;");
         const allProviders = await executeQuery("SELECT * from networkProvider;");
-
         let currentRow = {};
         let series = [];
         for (i = 0; i <= rows.length - 1; i++) {
