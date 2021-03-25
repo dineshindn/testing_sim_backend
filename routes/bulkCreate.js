@@ -69,7 +69,6 @@ const insertIntoSimTable = async (data, next) => {
     next();
   } catch (err) {
     next();
-    return res.send({ status: 400, message: 'failure', result: { error: err.message } });
   }
 }
 module.exports = {
@@ -77,7 +76,7 @@ module.exports = {
     try {
       if (!req.files || (req.files && !req.files.file)) return res.send({ status: 400, message: 'failure', reason: 'File Missing' });
       if (!req.body.uid) return res.send({ status: 400, message: 'failure', reason: 'Missing uid value' });
-      if (!req.body.cliendID) return res.send({ status: 400, message: 'failure', reason: 'Missing clientID' });
+      if (!req.body.clientID) return res.send({ status: 400, message: 'failure', reason: 'Missing clientID' });
 
       const sampleFile = req.files.file;
       const fileName = Date.now() + "_" + crypto.randomBytes(8).toString("hex") + "_" + sampleFile.name;
