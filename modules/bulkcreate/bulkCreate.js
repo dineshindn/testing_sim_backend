@@ -1,7 +1,7 @@
-const executeQuery = require("../database");
+const executeQuery = require("../../database");
 const crypto = require('crypto');
 const readXlsxFile = require('read-excel-file/node');
-const { simCreate } = require('../bulkCreateSchema');
+const { simCreate } = require('../../bulkCreateSchema');
 const fetch = require('node-fetch');
 var _ = require('lodash');
 var async = require('async');

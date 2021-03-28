@@ -1,7 +1,7 @@
-const executeQuery = require("../database");
+const executeQuery = require("../../database");
 const {
   formSetClause
-} = require('../utils')
+} = require('../../utils')
 
 module.exports = {
 

@@ -1,10 +1,10 @@
-const users = require("./users");
-const simDetails = require("./simDetails");
-const oem = require("./oem");
-const networkProvider = require("./networkProvider");
-const status = require("./status");
-const stats = require("./stats");
-const bulkCreate = require("./bulkCreate");
+const users = require("../modules/users/users");
+const simDetails = require("../modules/simDetails/simDetails");
+const oem = require("../modules/oem/oem");
+const networkProvider = require("../modules/networkProvider/networkProvider");
+const status = require("../modules/status/status");
+const stats = require("../modules/stats/stats");
+const bulkCreate = require("../modules/bulkcreate/bulkCreate");
 
 module.exports = (app) => {
   app.get("/api/v1/health-check", (req, res) =>

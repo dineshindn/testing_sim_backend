@@ -1,4 +1,4 @@
-const executeQuery = require("../database");
+const executeQuery = require("../../database");
 var async = require('async');
 var _ = require('lodash');
 

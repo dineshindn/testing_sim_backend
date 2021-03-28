@@ -1,4 +1,4 @@
-const executeQuery = require('../database');
+const executeQuery = require('../../database');
 
 module.exports = {
 
