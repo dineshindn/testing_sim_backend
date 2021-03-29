@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 CREATE TABLE IF NOT EXISTS `simDetails` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `deviceId` varchar(15) NOT NULL UNIQUE,
-  `simNumber` int(15) NOT NULL UNIQUE,
+  `deviceId` varchar(15) NOT NULL,
+  `simNumber` int(15) NOT NULL,
   `deviceSerialNumber` varchar(20) NOT NULL,
   `imeiNumber` varchar(20) NOT NULL,
   `fk_networkProviderId` bigint(20) NULL,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `simDetails` (
   `registrationNumber` int(20) NOT NULL,
   `subscriptionStatus` varchar(50) NOT NULL,
   `subscriptionEndDate` DATE,
-  `mobileNumber` varchar(15) NOT NULL UNIQUE,
+  `mobileNumber` varchar(15) NOT NULL,
   `fk_status` bigint(20) NULL,
   FOREIGN KEY (`fk_status`) REFERENCES `status` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `stateChangeDate` DATE,
@@ -101,10 +101,11 @@ CREATE TABLE IF NOT EXISTS `simTransactionHistory` (
 
 CREATE TABLE IF NOT EXISTS `userRequests` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `requestNumber` varchar(15) NOT NULL,
   `fk_simId` bigint(20) NULL,
   FOREIGN KEY (`fk_simId`) REFERENCES `simDetails` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `requestedState` varchar(50) NOT NULL,
-  `comments` varchar(100) NOT NULL,
+  `comments` varchar(100),
   `fk_assignedTo` bigint(20) NULL,
   FOREIGN KEY (`fk_assignedTo`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `fk_createdBy` bigint(20) NULL,
@@ -114,7 +115,8 @@ CREATE TABLE IF NOT EXISTS `userRequests` (
   `resolution` varchar(50) NOT NULL,
   `insertUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updateUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `closedDate` DATE NOT NULL
+  `closedDate` DATE,
+  `raisedDate` DATE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `simSwap` (
