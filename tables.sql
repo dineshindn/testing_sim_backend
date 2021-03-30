@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `mobileNumber` varchar(15) NOT NULL,
   `insertUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updateUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `clientId` varchar(30) NOT NULL,
-  `email` varchar(20) NOT NULL
+  `email` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `simDetails` (

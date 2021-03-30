@@ -1,10 +1,11 @@
-const users = require("../modules/users/users");
-const simDetails = require("../modules/simDetails/simDetails");
-const oem = require("../modules/oem/oem");
-const networkProvider = require("../modules/networkProvider/networkProvider");
-const status = require("../modules/status/status");
-const stats = require("../modules/stats/stats");
-const bulkCreate = require("../modules/bulkcreate/bulkCreate");
+const users = require("../modules/users/index");
+const simDetails = require("../modules/simDetails");
+const oem = require("../modules/oem");
+const networkProvider = require("../modules/networkProvider");
+const status = require("../modules/status");
+const stats = require("../modules/stats");
+const bulkCreate = require("../modules/bulkcreate");
+const userRequests = require("../modules/userRequests");
 
 module.exports = (app) => {
   app.get("/api/v1/health-check", (req, res) =>
@@ -46,4 +47,10 @@ module.exports = (app) => {
 
   //bulkCreate
   app.post("/simmanager/api/v1/bulkCreate", bulkCreate.simBulkUpload);
+
+  //userRequests
+  app.post("/simmanager/api/v1/userRequests", userRequests.create);
+  app.get("/simmanager/api/v1/userRequests", userRequests.list);
+  app.delete("/simmanager/api/v1/userRequests", userRequests.delete);
+
 };
