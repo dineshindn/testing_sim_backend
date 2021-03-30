@@ -35,13 +35,35 @@ module.exports = {
       return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
-      
+
   async list(req, res) {
     try {
       const result = await executeQuery("SELECT * FROM `userRequests`");
       return res.status(200).send({ data: result });
     } catch (err) {
       return res.status(500).send({ error: err });
+    }
+  },
+
+  async getUserRequestById(req, res) {
+    try {
+      let _id = req && req.query && req.query.id ? req.query.id : '';
+      let value;
+      let query;
+      if (_id) {
+        query = `SELECT * FROM userRequests WHERE id=?;`;
+        value = _id;
+      } else {
+        return res.send({ status: 400, message: 'failure', reason: 'Invalid query', result: { error: err.message } });
+      }
+      const result = await executeQuery(query, [value]);
+      if (result && result.length) {
+        const userData = await executeQuery(`SELECT * FROM simDetails WHERE id=?`, [result[0].fk_simId]);
+        if (userData && userData.length) result.push(userData[0]);
+      }
+      return res.send({ status: 200, message: 'success', result: result });
+    } catch (err) {
+      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
 

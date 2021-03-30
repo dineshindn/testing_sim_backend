@@ -52,5 +52,6 @@ module.exports = (app) => {
   app.post("/simmanager/api/v1/userRequests", userRequests.create);
   app.get("/simmanager/api/v1/userRequests", userRequests.list);
   app.delete("/simmanager/api/v1/userRequests", userRequests.delete);
+  app.get("/simmanager/api/v1/getUserRequestById", userRequests.getUserRequestById);
 
 };
