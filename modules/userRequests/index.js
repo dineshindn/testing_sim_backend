@@ -13,7 +13,7 @@ module.exports = {
     try {
       const requestNumber = randomize('A0', 8);
       const result = await executeQuery(
-        "INSERT INTO userRequests (requestNumber, fk_simId, requestedState, comments, fk_assignedTo, fk_createdBy, fk_status, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO userRequests (requestNumber, fk_simId, requestedState, comments, fk_assignedTo, fk_createdBy, fk_requestStatus, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           requestNumber,
           req.body.fk_simId,
@@ -21,7 +21,7 @@ module.exports = {
           req.body.comments,
           req.body.fk_assignedTo,
           req.body.fk_createdBy,
-          req.body.fk_status,
+          req.body.fk_requestStatus,
           req.body.resolution,
           req.body.closedDate,
           req.body.raisedDate,

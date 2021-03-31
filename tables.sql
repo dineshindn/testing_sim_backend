@@ -6,6 +6,14 @@ CREATE TABLE IF NOT EXISTS `status` (
   `updateUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE IF NOT EXISTS `requestStatus` (
+  `id` bigint(20) NOT NULL PRIMARY KEY,
+  `name` varchar(20) NOT NULL,
+  `description` varchar(20) NOT NULL,
+  `insertUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updateUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE IF NOT EXISTS `oem` (
   `id` bigint(20) NOT NULL PRIMARY KEY,
   `name` varchar(30) NOT NULL,
@@ -109,8 +117,8 @@ CREATE TABLE IF NOT EXISTS `userRequests` (
   FOREIGN KEY (`fk_assignedTo`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `fk_createdBy` bigint(20) NULL,
   FOREIGN KEY (`fk_createdBy`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  `fk_status` bigint(20) NULL,
-  FOREIGN KEY (`fk_status`) REFERENCES `status` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  `fk_requestStatus` bigint(20) NULL,
+  FOREIGN KEY (`fk_requestStatus`) REFERENCES `fk_requestStatus` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `resolution` varchar(50) NOT NULL,
   `insertUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updateUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
