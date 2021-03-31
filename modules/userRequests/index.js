@@ -13,15 +13,15 @@ module.exports = {
     try {
       const requestNumber = randomize('A0', 8);
       const result = await executeQuery(
-        "INSERT INTO userRequests (requestNumber, fk_simId, requestedState, comments, fk_assignedTo, fk_createdBy, fk_requestStatus, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO userRequests (requestNumber, fk_simId, fk_requestedState, comments, fk_assignedTo, fk_createdBy, status, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           requestNumber,
-          req.body.fk_simId,
+          req.body.simId,
           req.body.requestedState,
           req.body.comments,
-          req.body.fk_assignedTo,
-          req.body.fk_createdBy,
-          req.body.fk_requestStatus,
+          req.body.assignedTo,
+          req.body.createdBy,
+          'Pending',
           req.body.resolution,
           req.body.closedDate,
           req.body.raisedDate,
@@ -47,11 +47,11 @@ module.exports = {
 
   async getUserRequestById(req, res) {
     try {
-      let _id = req && req.query && req.query.id ? req.query.id : '';
+      let _id = req && req.query && req.query.requestNumber ? req.query.requestNumber : '';
       let value;
       let query;
       if (_id) {
-        query = `SELECT * FROM userRequests WHERE id=?;`;
+        query = `SELECT * FROM userRequests WHERE requestNumber=?;`;
         value = _id;
       } else {
         return res.send({ status: 400, message: 'failure', reason: 'Invalid query', result: { error: err.message } });
@@ -64,6 +64,37 @@ module.exports = {
       return res.send({ status: 200, message: 'success', result: result });
     } catch (err) {
       return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+    }
+  },
+
+  async userRequestStateChange(req, res) {
+    try {
+      const { requestNumber, state , resolution} = req.body ? req.body : {};
+      if (requestNumber && state && resolution) {
+        let approveStatus =  req.body && req.body.isApprove === true ? 'Approved' : req.body.isApprove === false ? 'Rejected' : 'Pending';
+        const recordExists = (await executeQuery("SELECT * from userRequests WHERE requestNumber=?", [requestNumber]))[0];
+
+        if (!recordExists) {
+          return res.send({ status: 400, message: 'failure', reason: "Status Id error" });
+        }
+        await executeQuery(
+          "UPDATE userRequests SET fk_requestedState=?, resolution=?, status=?, updateUTC=?, closedDate=? WHERE requestNumber=?;",
+          [
+            state,
+            resolution,
+            approveStatus,
+            new Date(),
+            new Date(),
+            requestNumber
+          ]
+        );
+        return res.send({ status: 200, message: 'Success', reason: 'state changed' });
+      } else {
+        return res.send({ status: 400, message: 'failure', reason: "Invalid post data" });
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(400).send({ error: err.message });
     }
   },
 
