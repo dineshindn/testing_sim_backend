@@ -38,10 +38,27 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const result = await executeQuery("SELECT * FROM `userRequests`");
-      return res.status(200).send({ data: result });
+      const limit = req && req.query && req.query.limit ? req.query.limit : 10;
+      const page = req && req.query && req.query.page ? req.query.page : 1;
+      const sort = req && req.query && req.query.page ? req.query.sort : '';
+
+      var offset;
+      offset = (page - 1) * limit;
+      offset = Number.isNaN(offset) ? 0 : offset;
+      let value;
+      let query;
+      query = `SELECT * FROM userRequests limit ${limit} offset ${offset};`;
+      const result = await executeQuery(query, [value]);
+      const totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
+      const responseJson = {
+        'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
+        'pageCount': result.length,
+        'pageNumber': page,
+        'data': result
+      }
+      return res.send({ status: 200, message: 'success', result: responseJson });
     } catch (err) {
-      return res.status(500).send({ error: err });
+      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }
   },
 
@@ -69,9 +86,9 @@ module.exports = {
 
   async userRequestStateChange(req, res) {
     try {
-      const { requestNumber, state , resolution} = req.body ? req.body : {};
+      const { requestNumber, state, resolution } = req.body ? req.body : {};
       if (requestNumber && state && resolution) {
-        let approveStatus =  req.body && req.body.isApprove === true ? 'Approved' : req.body.isApprove === false ? 'Rejected' : 'Pending';
+        let approveStatus = req.body && req.body.isApprove === true ? 'Approved' : req.body.isApprove === false ? 'Rejected' : 'Pending';
         const recordExists = (await executeQuery("SELECT * from userRequests WHERE requestNumber=?", [requestNumber]))[0];
 
         if (!recordExists) {

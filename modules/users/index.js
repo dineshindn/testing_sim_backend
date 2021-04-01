@@ -16,11 +16,8 @@ module.exports = {
   },
 
   async list(req, res) {
-    let values = [];
-    let query = "SELECT a.id, a.firstName, a.lastName, a.role FROM users a";
-
     try {
-      const result = await executeQuery(query, values);
+      const result = await executeQuery("SELECT * FROM `users`");
       return res.status(200).send({ data: result });
     } catch (err) {
       return res.status(500).send({ error: err });
