@@ -36,6 +36,45 @@ module.exports = {
     }
   },
 
+  async update(req, res) {
+    req.body[ 'fk_simId' ] = req.body[ 'simId' ];
+    delete req.body[ 'simId' ];
+    req.body[ 'fk_requestedState' ] = req.body[ 'requestedState' ];
+    delete req.body[ 'requestedState' ];
+    req.body[ 'fk_assignedTo' ] = req.body[ 'assignedTo' ];
+    delete req.body[ 'assignedTo' ];
+    req.body[ 'fk_createdBy' ] = req.body[ 'createdBy' ];
+    delete req.body[ 'createdBy' ];
+
+    const whiteListedColumns = [
+      "requestNumber",
+      "fk_simId",
+      "fk_requestedState",
+      "comments",
+      "fk_assignedTo",
+      "fk_createdBy",
+      "status",
+      "resolution",
+      "closedDate",
+      "raisedDate"
+    ];
+    try {
+      let { setClause, values } = await formSetClause(req.body, whiteListedColumns);
+      setClause += ', updateUTC=?';
+      const record = (await executeQuery("SELECT * from userRequests WHERE id=?", [req.query.id]));
+      if (record && record.length === 0) return res.status(404).send({ error: "Record not found" });
+
+      let updateQuery = `UPDATE userRequests` + setClause + " WHERE id=?";
+      values.push(new Date());
+      values.push(record[0].id);
+      const result = await executeQuery(updateQuery, values);
+      return res.send({ status: 200, message: 'success', reason: 'updated successfully', result: { id: record[0].id, requestNumber: record[0].requestNumber } });
+    } catch (err) {
+      console.log(err);
+      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+    }
+  },
+
   async list(req, res) {
     try {
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
