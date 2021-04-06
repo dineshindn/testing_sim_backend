@@ -16,15 +16,15 @@ module.exports = {
         "INSERT INTO userRequests (requestNumber, fk_simId, fk_requestedState, comments, fk_assignedTo, fk_createdBy, status, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           requestNumber,
-          req.body.simId,
-          req.body.requestedState,
+          req.body.fk_simId,
+          req.body.fk_requestedState,
           req.body.comments,
-          req.body.assignedTo,
-          req.body.createdBy,
+          req.body.fk_assignedTo,
+          req.body.fk_createdBy,
           'Pending',
           req.body.resolution,
           req.body.closedDate,
-          req.body.raisedDate,
+          new Date,
           new Date(),
           new Date()
         ]
@@ -37,15 +37,6 @@ module.exports = {
   },
 
   async update(req, res) {
-    req.body[ 'fk_simId' ] = req.body[ 'simId' ];
-    delete req.body[ 'simId' ];
-    req.body[ 'fk_requestedState' ] = req.body[ 'requestedState' ];
-    delete req.body[ 'requestedState' ];
-    req.body[ 'fk_assignedTo' ] = req.body[ 'assignedTo' ];
-    delete req.body[ 'assignedTo' ];
-    req.body[ 'fk_createdBy' ] = req.body[ 'createdBy' ];
-    delete req.body[ 'createdBy' ];
-
     const whiteListedColumns = [
       "requestNumber",
       "fk_simId",
@@ -77,6 +68,8 @@ module.exports = {
 
   async list(req, res) {
     try {
+      const { requestNumber, comments, requestedState, requestedStateSort, commentsSort, resolution, resolutionSort, raisedDate, raisedDateSort, closedDate, closedDateSort, status, statusSort, isDownload } = req && req.query ? req.query : {};
+
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
       const sort = req && req.query && req.query.page ? req.query.sort : '';
@@ -86,7 +79,41 @@ module.exports = {
       offset = Number.isNaN(offset) ? 0 : offset;
       let value;
       let query;
-      query = `SELECT * FROM userRequests limit ${limit} offset ${offset};`;
+      if (requestNumber || requestedState || requestedStateSort || comments || commentsSort || resolution || resolutionSort || raisedDate || raisedDateSort || closedDate || closedDateSort || status || statusSort) {
+        if (requestNumber) {
+          query = `SELECT * FROM userRequests WHERE requestNumber REGEXP '${requestNumber}' limit ${limit} offset ${offset};`;
+          value = requestNumber;
+        } else if (comments || commentsSort) {
+          query = commentsSort ? `SELECT * FROM userRequests ORDER BY comments ${commentsSort} limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE comments REGEXP '${comments}' limit ${limit} offset ${offset};`;
+          value = comments;
+        } else if (status) {
+          query = status == 'ALL' ? `SELECT * FROM userRequests limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE status=? limit ${limit} offset ${offset}`;
+          value = status;
+        } else if (statusSort) {
+          query = `SELECT * FROM userRequests ORDER BY status ${statusSort} limit ${limit} offset ${offset};`
+          value = statusSort;
+        } else if (requestedState) {
+          query = requestedState == 'ALL' ? `SELECT * FROM userRequests limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE fk_requestedState=? limit ${limit} offset ${offset}`;
+          value = requestedState;
+        }
+        // else if (requestedStateSort) {
+        //   const reqStateId = (await executeQuery(`SELECT id FROM requestStatus WHERE name=?`, [requestedStateSort]))[0];
+        //   query = `SELECT * FROM userRequests WHERE fk_requestedState REGEXP ${reqStateId.id} limit ${limit} offset ${offset};`;
+        //   value = reqStateId.id;
+        // } 
+        else if (raisedDate || raisedDateSort) {
+          query = raisedDateSort ? `SELECT * FROM userRequests ORDER BY raisedDate ${raisedDateSort};` : `SELECT * FROM userRequests WHERE raisedDate=?`;
+          value = raisedDate;
+        } else if (closedDate || closedDateSort) {
+          query = closedDateSort ? `SELECT * FROM userRequests ORDER BY closedDate ${closedDateSort};` : `SELECT * FROM userRequests WHERE closedDate=?`;
+          value = closedDate;
+        } else if (resolution || resolutionSort) {
+          query = resolutionSort ? `SELECT * FROM userRequests ORDER BY resolution ${resolutionSort} limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE resolution REGEXP '${resolution}' limit ${limit} offset ${offset};`;
+          value = resolution;
+        }
+      } else {
+        query = `SELECT * FROM userRequests limit ${limit} offset ${offset};`;
+      }
       const result = await executeQuery(query, [value]);
       const totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
       const responseJson = {

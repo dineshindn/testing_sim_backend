@@ -139,7 +139,7 @@ module.exports = {
           query = stateChangeDateSort ? `SELECT * FROM simDetails ORDER BY stateChangeDate ${stateChangeDateSort};` : `SELECT * FROM simDetails WHERE stateChangeDate=?`;
           value = stateChangeDate;
         } else if (dispatchDate || dispatchDateSort) {
-          query = dispatchDateSort ? `SELECT * FROM simDetails ORDER BY dispatchDateSort ${dispatchDateSort};` : `SELECT * FROM simDetails WHERE dispatchDate=?`;
+          query = dispatchDateSort ? `SELECT * FROM simDetails ORDER BY dispatchDate ${dispatchDateSort};` : `SELECT * FROM simDetails WHERE dispatchDate=?`;
           value = dispatchDate;
         } else if (from && to) {
           query = `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
@@ -167,7 +167,7 @@ module.exports = {
             } finally {
               finalData = [];
             }
-
+            
           });
         }
       } else {
