@@ -68,7 +68,7 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const { requestNumber, comments, requestedState, requestedStateSort, commentsSort, resolution, resolutionSort, raisedDate, raisedDateSort, closedDate, closedDateSort, status, statusSort, isDownload } = req && req.query ? req.query : {};
+      const { requestNumber, comments, requestedState, requestedStateSort, commentsSort, resolution, resolutionSort, raisedDate, raisedDateSort, closedDate, closedDateSort, status, statusSort, assignedTo, createdBy, isDownload } = req && req.query ? req.query : {};
 
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
@@ -79,7 +79,7 @@ module.exports = {
       offset = Number.isNaN(offset) ? 0 : offset;
       let value;
       let query;
-      if (requestNumber || requestedState || requestedStateSort || comments || commentsSort || resolution || resolutionSort || raisedDate || raisedDateSort || closedDate || closedDateSort || status || statusSort) {
+      if (requestNumber || requestedState || requestedStateSort || comments || commentsSort || resolution || resolutionSort || raisedDate || raisedDateSort || closedDate || closedDateSort || status || statusSort || assignedTo || createdBy) {
         if (requestNumber) {
           query = `SELECT * FROM userRequests WHERE requestNumber REGEXP '${requestNumber}' limit ${limit} offset ${offset};`;
           value = requestNumber;
@@ -87,14 +87,20 @@ module.exports = {
           query = commentsSort ? `SELECT * FROM userRequests ORDER BY comments ${commentsSort} limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE comments REGEXP '${comments}' limit ${limit} offset ${offset};`;
           value = comments;
         } else if (status) {
-          query = status == 'ALL' ? `SELECT * FROM userRequests limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE status=? limit ${limit} offset ${offset}`;
+          query = status == 'ALL' ? `SELECT * FROM userRequests limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE status REGEXP '${status}' limit ${limit} offset ${offset}`;
           value = status;
         } else if (statusSort) {
           query = `SELECT * FROM userRequests ORDER BY status ${statusSort} limit ${limit} offset ${offset};`
           value = statusSort;
         } else if (requestedState) {
-          query = requestedState == 'ALL' ? `SELECT * FROM userRequests limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE fk_requestedState=? limit ${limit} offset ${offset}`;
-          value = requestedState;
+          if (requestedState === 'ALL') {
+            query = `SELECT * FROM userRequests limit ${limit} offset ${offset};`
+          } else {
+            const reqStateId = (await executeQuery(`SELECT id FROM requestStatus WHERE name REGEXP '${requestedState}';`))[0]
+            let _id = reqStateId && reqStateId.id ? reqStateId.id : ''
+            query = `SELECT * FROM userRequests WHERE fk_requestedState=? limit ${limit} offset ${offset};`;
+          }
+          value = _id;
         }
         // else if (requestedStateSort) {
         //   const reqStateId = (await executeQuery(`SELECT id FROM requestStatus WHERE name=?`, [requestedStateSort]))[0];
@@ -110,6 +116,16 @@ module.exports = {
         } else if (resolution || resolutionSort) {
           query = resolutionSort ? `SELECT * FROM userRequests ORDER BY resolution ${resolutionSort} limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE resolution REGEXP '${resolution}' limit ${limit} offset ${offset};`;
           value = resolution;
+        } else if (assignedTo) {
+          const assignedId = (await executeQuery(`SELECT id FROM users WHERE firstName REGEXP '${assignedTo}';`))[0]
+          let _id = assignedId && assignedId.id ? assignedId.id : ''
+          query = `SELECT * FROM userRequests WHERE fk_assignedTo=? limit ${limit} offset ${offset};`;
+          value = _id;
+        } else if (createdBy) {
+          const createdById = (await executeQuery(`SELECT id FROM users WHERE firstName REGEXP '${createdBy}';`))[0]
+          let _id = createdById && createdById.id ? createdById.id : ''
+          query = `SELECT * FROM userRequests WHERE fk_createdBy=? limit ${limit} offset ${offset};`;
+          value = _id;
         }
       } else {
         query = `SELECT * FROM userRequests limit ${limit} offset ${offset};`;

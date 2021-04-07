@@ -98,7 +98,7 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const { simNumber, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, statusId, dispatchDateSort, from, to, isDownload } = req && req.query ? req.query : {};
+      const { simNumber, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, status, dispatchDateSort, from, to, isDownload } = req && req.query ? req.query : {};
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
       const sort = req && req.query && req.query.page ? req.query.sort : '';
@@ -108,7 +108,7 @@ module.exports = {
       offset = Number.isNaN(offset) ? 0 : offset;
       let value;
       let query;
-      if (simNumber || deviceId || mobileNumber || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || statusId || deviceIdSort || dispatchDateSort || from || to) {
+      if (simNumber || deviceId || mobileNumber || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || status || deviceIdSort || dispatchDateSort || from || to) {
         if (simNumber) {
           query = `SELECT * FROM simDetails WHERE simNumber REGEXP ${simNumber} limit ${limit} offset ${offset};`;
           value = simNumber;
@@ -122,20 +122,29 @@ module.exports = {
           query = `SELECT * FROM simDetails WHERE networkProviderId REGEXP ${networkProviderId} limit ${limit} offset ${offset};`;
           value = networkProviderId;
         } else if (networkProvider) {
-          const networkId = (await executeQuery(`SELECT id FROM networkProvider WHERE name=?`, [networkProvider]))[0]
-          query = `SELECT * FROM simDetails WHERE fk_networkProviderId REGEXP ${networkId.id} limit ${limit} offset ${offset};`;
-          value = networkId.id;
+          const networkId = (await executeQuery(`SELECT id FROM networkProvider WHERE name REGEXP '${networkProvider}';`))[0]
+          let _id = networkId && networkId.id ? networkId.id : ''
+          query = `SELECT * FROM simDetails WHERE fk_networkProviderId=? limit ${limit} offset ${offset};`;
+          value = _id;
         } else if (oem) {
-          const oemId = (await executeQuery(`SELECT id FROM oem WHERE name=?`, [oem]))[0]
-          query = `SELECT * FROM simDetails WHERE fk_oem REGEXP ${oemId.id} limit ${limit} offset ${offset};`;
-          value = oemId.id;
+          const oemId = (await executeQuery(`SELECT id FROM oem WHERE name REGEXP '${oem}';`))[0]
+          let _id = oemId && oemId.id ? oemId.id : ''
+          query = `SELECT * FROM simDetails WHERE fk_oem=? limit ${limit} offset ${offset};`;
+          value = _id;
         } else if (imeiNumber) {
           query = `SELECT * FROM simDetails WHERE imeiNumber REGEXP ${imeiNumber} limit ${limit} offset ${offset};`;
           value = imeiNumber;
-        } else if (statusId) {
-          query = statusId == 'ALL' ? `SELECT * FROM simDetails limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset}`;
-          value = statusId;
-        } else if (stateChangeDate || stateChangeDateSort) {
+        } else if (status) {
+          if (status === 'ALL') {
+            query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`
+          } else {
+            const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
+            let _id = statusId && statusId.id ? statusId.id : ''
+            query = `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset};`;
+            value = _id;
+          }
+        }
+        else if (stateChangeDate || stateChangeDateSort) {
           query = stateChangeDateSort ? `SELECT * FROM simDetails ORDER BY stateChangeDate ${stateChangeDateSort};` : `SELECT * FROM simDetails WHERE stateChangeDate=?`;
           value = stateChangeDate;
         } else if (dispatchDate || dispatchDateSort) {
