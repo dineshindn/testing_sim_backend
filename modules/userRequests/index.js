@@ -5,7 +5,36 @@ var randomize = require('randomatic');
 
 const {
   formSetClause
-} = require('../../utils')
+} = require('../../utils');
+
+let finalData = [];
+const getReport = async (rowData, next) => {
+  try {
+    const reqState = await executeQuery(`SELECT name FROM requestStatus WHERE id=?;`, [rowData.fk_requestedState]);
+    const assignedName = await executeQuery(`SELECT firstName FROM users WHERE id=?;`, [rowData.fk_assignedTo]);
+    const createdName = await executeQuery(`SELECT firstName FROM users WHERE id=?;`, [rowData.fk_createdBy]);
+    const sim = await executeQuery(`SELECT simNumber FROM simDetails WHERE id=?;`, [rowData.fk_simId]);
+    if (reqState && reqState[0].name) rowData['requested state'] = reqState[0].name;
+    if (assignedName && assignedName[0].firstName) rowData['assigned to'] = assignedName[0].firstName;
+    if (createdName && createdName[0].firstName) rowData['created by'] = createdName[0].firstName;
+    if (sim && sim[0].simNumber) rowData['sim number'] = sim[0].simNumber;
+    rowData['Created at'] = rowData.insertUTC;
+    rowData['Last updated'] = rowData.updateUTC;
+    delete rowData.fk_requestedState;
+    delete rowData.fk_assignedTo;
+    delete rowData.fk_createdBy;
+    delete rowData.insertUTC;
+    delete rowData.updateUTC;
+    delete rowData.fk_simId;
+    delete rowData.id;
+    finalData.push(rowData);
+    next();
+  } catch (_err) {
+    console.log(":::Generate excel error:::::=>", _err)
+    next();
+  }
+}
+
 
 module.exports = {
 
@@ -69,7 +98,7 @@ module.exports = {
   async list(req, res) {
     try {
       const { requestNumber, comments, requestedState, requestedStateSort, commentsSort, resolution, resolutionSort, raisedDate, raisedDateSort, closedDate, closedDateSort, status, statusSort, assignedTo, createdBy, isDownload } = req && req.query ? req.query : {};
-
+      
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
       const sort = req && req.query && req.query.page ? req.query.sort : '';
@@ -131,14 +160,38 @@ module.exports = {
         query = `SELECT * FROM userRequests limit ${limit} offset ${offset};`;
       }
       const result = await executeQuery(query, [value]);
-      const totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
-      const responseJson = {
-        'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
-        'pageCount': result.length,
-        'pageNumber': page,
-        'data': result
+      if (isDownload && isDownload === 'true') {
+        if (result && result.length) {
+          let series = [];
+          result.forEach((element) => {
+            series.push(next => {
+              getReport(element, next);
+            });
+          })
+          async.series(series, async function (err) {
+            try {
+              if (err) {
+                return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+              }
+              return res.xls('data.xlsx', finalData)
+            } catch (error) {
+              return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: error.message } });
+            } finally {
+              finalData = [];
+            }
+
+          });
+        }
+      } else {
+        const totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
+        const responseJson = {
+          'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
+          'pageCount': result.length,
+          'pageNumber': page,
+          'data': result
+        }
+        return res.send({ status: 200, message: 'success', result: responseJson });
       }
-      return res.send({ status: 200, message: 'success', result: responseJson });
     } catch (err) {
       return res.send({ status: 400, message: 'failure', result: { error: err.message } });
     }

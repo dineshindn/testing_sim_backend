@@ -13,15 +13,17 @@ const getReport = async (rowData, next) => {
     const oemName = await executeQuery(`SELECT name FROM oem WHERE id=?;`, [rowData.fk_oem]);
     const providerName = await executeQuery(`SELECT name FROM networkProvider WHERE id=?;`, [rowData.fk_networkProviderId]);
     const statusName = await executeQuery(`SELECT name FROM status WHERE id=?;`, [rowData.fk_status]);
-    delete rowData.fk_status;
-    delete rowData.fk_oem;
-    delete rowData.fk_networkProviderId;
-    delete rowData.insertUTC;
     if (oemName && oemName[0].name) rowData['Customer'] = oemName[0].name;
     if (providerName && providerName[0].name) rowData['Network Provider'] = providerName[0].name;
     if (statusName && statusName[0].name) rowData['Status'] = statusName[0].name;
     rowData['Created at'] = rowData.insertUTC;
-    rowData['Last updated'] = rowData.updateUTC
+    rowData['Last updated'] = rowData.updateUTC;
+    delete rowData.fk_status;
+    delete rowData.fk_oem;
+    delete rowData.fk_networkProviderId;
+    delete rowData.insertUTC;
+    delete rowData.id;
+
     finalData.push(rowData);
     next();
   } catch (_err) {
