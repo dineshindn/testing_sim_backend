@@ -130,13 +130,11 @@ CREATE TABLE IF NOT EXISTS `simSwap` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `fk_createdBy` bigint(20) NULL,
   FOREIGN KEY (`fk_createdBy`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  `fk_currentSim` bigint(20) NULL,
-  FOREIGN KEY (`fk_currentSim`) REFERENCES `simDetails` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  `fk_oldSim` bigint(20) NULL,
+  FOREIGN KEY (`fk_oldSim`) REFERENCES `simDetails` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `fk_newSim` bigint(20) NULL,
   FOREIGN KEY (`fk_newSim`) REFERENCES `simDetails` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `reasonForSimReplacement` varchar(50) NOT NULL,
-  `fk_status` bigint(20) NULL,
-  FOREIGN KEY (`fk_status`) REFERENCES `status` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `insertUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updateUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
