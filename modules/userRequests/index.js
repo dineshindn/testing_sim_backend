@@ -221,8 +221,8 @@ module.exports = {
 
   async userRequestStateChange(req, res) {
     try {
-      const { requestNumber, state, resolution } = req.body ? req.body : {};
-      if (requestNumber && state && resolution) {
+      const { requestNumber, state, resolution, approvedOrRejectedBy } = req.body ? req.body : {};
+      if (requestNumber && state && resolution && approvedOrRejectedBy) {
         let approveStatus = req.body && req.body.isApprove === true ? 'Approved' : req.body.isApprove === false ? 'Rejected' : 'Pending';
         const recordExists = (await executeQuery("SELECT * from userRequests WHERE requestNumber=?", [requestNumber]))[0];
 
@@ -230,8 +230,9 @@ module.exports = {
           return res.send({ status: 400, message: 'failure', reason: "Status Id error" });
         }
         await executeQuery(
-          "UPDATE userRequests SET fk_requestedState=?, resolution=?, status=?, updateUTC=?, closedDate=? WHERE requestNumber=?;",
+          "UPDATE userRequests SET fk_assignedTo=?, fk_requestedState=?, resolution=?, status=?, updateUTC=?, closedDate=? WHERE requestNumber=?;",
           [
+            approvedOrRejectedBy,
             state,
             resolution,
             approveStatus,
