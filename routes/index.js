@@ -7,6 +7,7 @@ const stats = require("../modules/stats");
 const bulkCreate = require("../modules/bulkcreate");
 const userRequests = require("../modules/userRequests");
 const requestState = require("../modules/requestState");
+const simSwap = require("../modules/simSwap");
 
 module.exports = (app) => {
   app.get("/api/v1/health-check", (req, res) =>
@@ -57,9 +58,11 @@ module.exports = (app) => {
   app.post("/simmanager/api/v1/userRequestStateChange", userRequests.userRequestStateChange);
   app.patch("/simmanager/api/v1/userRequests", userRequests.update);
 
-
   //requeststatus
   app.get("/simmanager/api/v1/requestState", requestState.list);
   app.delete("/simmanager/api/v1/requestState", requestState.delete);
 
+  //simSwap
+  app.post("/simmanager/api/v1/simSwap", simSwap.create);
+  app.get("/simmanager/api/v1/simSwap", simSwap.list);
 };

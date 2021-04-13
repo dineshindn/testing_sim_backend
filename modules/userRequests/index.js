@@ -53,7 +53,7 @@ module.exports = {
           'Pending',
           req.body.resolution,
           req.body.closedDate,
-          new Date,
+          new Date(),
           new Date(),
           new Date()
         ]
