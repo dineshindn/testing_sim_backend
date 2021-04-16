@@ -59,9 +59,9 @@ module.exports = {
         ]
       );
       const request = (await executeQuery("SELECT requestNumber from userRequests WHERE id=?", [result.insertId]))[0];
-      return res.send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, requestNumber: request.requestNumber } });
+      return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, requestNumber: request.requestNumber } });
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
     }
   },
 
@@ -88,17 +88,17 @@ module.exports = {
       values.push(new Date());
       values.push(record[0].id);
       const result = await executeQuery(updateQuery, values);
-      return res.send({ status: 200, message: 'success', reason: 'updated successfully', result: { id: record[0].id, requestNumber: record[0].requestNumber } });
+      return res.status(200).send({ status: 200, message: 'success', reason: 'updated successfully', result: { id: record[0].id, requestNumber: record[0].requestNumber } });
     } catch (err) {
       console.log(err);
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
     }
   },
 
   async list(req, res) {
     try {
       const { requestNumber, comments, requestedState, requestedStateSort, commentsSort, resolution, resolutionSort, raisedDate, raisedDateSort, closedDate, closedDateSort, status, statusSort, assignedTo, createdBy, isDownload } = req && req.query ? req.query : {};
-      
+
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
       const sort = req && req.query && req.query.page ? req.query.sort : '';
@@ -171,11 +171,11 @@ module.exports = {
           async.series(series, async function (err) {
             try {
               if (err) {
-                return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+                return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
               }
               return res.xls('data.xlsx', finalData)
             } catch (error) {
-              return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: error.message } });
+              return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: error.message } });
             } finally {
               finalData = [];
             }
@@ -190,10 +190,10 @@ module.exports = {
           'pageNumber': page,
           'data': result
         }
-        return res.send({ status: 200, message: 'success', result: responseJson });
+        return res.status(200).send({ status: 200, message: 'success', result: responseJson });
       }
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
     }
   },
 
@@ -206,16 +206,16 @@ module.exports = {
         query = `SELECT * FROM userRequests WHERE requestNumber=?;`;
         value = _id;
       } else {
-        return res.send({ status: 400, message: 'failure', reason: 'Invalid query', result: { error: err.message } });
+        return res.status(400).send({ status: 400, message: 'failure', reason: 'Invalid query' });
       }
       const result = await executeQuery(query, [value]);
       if (result && result.length) {
         const userData = await executeQuery(`SELECT * FROM simDetails WHERE id=?`, [result[0].fk_simId]);
         if (userData && userData.length) result.push(userData[0]);
       }
-      return res.send({ status: 200, message: 'success', result: result });
+      return res.status(200).send({ status: 200, message: 'success', result: result });
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
     }
   },
 
@@ -227,7 +227,7 @@ module.exports = {
         const recordExists = (await executeQuery("SELECT * from userRequests WHERE requestNumber=?", [requestNumber]))[0];
 
         if (!recordExists) {
-          return res.send({ status: 400, message: 'failure', reason: "Status Id error" });
+          return res.status(400).send({ status: 400, message: 'failure', reason: "Status Id error" });
         }
         await executeQuery(
           "UPDATE userRequests SET fk_assignedTo=?, fk_requestedState=?, resolution=?, status=?, updateUTC=?, closedDate=? WHERE requestNumber=?;",
@@ -241,13 +241,13 @@ module.exports = {
             requestNumber
           ]
         );
-        return res.send({ status: 200, message: 'Success', reason: 'state changed' });
+        return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
       } else {
-        return res.send({ status: 400, message: 'failure', reason: "Invalid post data" });
+        return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid post data" });
       }
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ error: err.message });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', error: err.message });
     }
   },
 
@@ -255,9 +255,9 @@ module.exports = {
     try {
       let recordId = req && req.query && req.query.id ? req.query.id : '';
       await executeQuery("DELETE FROM `userRequests` WHERE id=?", [recordId]);
-      return res.send({ status: 200, message: 'success', reason: 'Deleted successfully', result: { id: recordId } });
+      return res.status(200).send({ status: 200, message: 'success', reason: 'Deleted successfully', result: { id: recordId } });
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
     }
   },
 };

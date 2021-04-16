@@ -18,17 +18,17 @@ module.exports = {
         })
         async.series(series, async function (err) {
           if (err) {
-            return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+            return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
           }
           const resp = await executeQuery(`SELECT COUNT(*) AS totalSimCards FROM simDetails;`);
-          return res.send({ status: 200, message: 'success', totalSimCards: resp[0].totalSimCards, result: finalData });
+          return res.status(200).send({ status: 200, message: 'success', totalSimCards: resp[0].totalSimCards, result: finalData });
         });
       } else {
-        return res.send({ status: 400, message: 'failure', reason: "No record found" });
+        return res.status(400).send({ status: 400, message: 'failure', reason: "No record found" });
 
       }
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
     }
     async function getReport(id, statusName, next) {
       try {
@@ -40,7 +40,7 @@ module.exports = {
         next();
       } catch (_err) {
         next();
-        return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: _err.message } });
+        return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: _err.message } });
       }
 
     }
@@ -59,16 +59,16 @@ module.exports = {
         })
         async.series(series, function (err) {
           if (err) {
-            return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+            return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
           }
-          return res.send({ status: 200, message: 'success', result: finalData });
+          return res.status(200).send({ status: 200, message: 'success', result: finalData });
         });
       } else {
-        return res.send({ status: 400, message: 'failure', reason: "No record found" });
+        return res.status(400).send({ status: 400, message: 'failure', reason: "No record found" });
 
       }
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
     }
     async function getProviderReport(id, providerName, next) {
       try {
@@ -97,7 +97,7 @@ module.exports = {
         next();
       } catch (_err) {
         next();
-        return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: _err.message } });
+        return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: _err.message } });
       }
 
     }
@@ -116,16 +116,16 @@ module.exports = {
         })
         async.series(series, function (err) {
           if (err) {
-            return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+            return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
           }
-          return res.send({ status: 200, message: 'success', result: finalData });
+          return res.status(200).send({ status: 200, message: 'success', result: finalData });
         });
       } else {
-        return res.send({ status: 400, message: 'failure', reason: "No record found" });
+        return res.status(400).send({ status: 400, message: 'failure', reason: "No record found" });
 
       }
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
     }
     async function getOemReport(id, oemName, next) {
       try {
@@ -137,7 +137,7 @@ module.exports = {
         next();
       } catch (_err) {
         next();
-        return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: _err.message } });
+        return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: _err.message } });
       }
 
     }

@@ -58,9 +58,11 @@ module.exports = {
         ]
       );
       const sim = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [result.insertId]))[0];
-      return res.send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, deviceId: sim.deviceId } });
+      return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, deviceId: sim.deviceId } });
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      //return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', error: err.message });
+
     }
   },
 
@@ -91,10 +93,10 @@ module.exports = {
       values.push(new Date());
       values.push(sim[0].id);
       const result = await executeQuery(updateQuery, values);
-      return res.send({ status: 200, message: 'success', reason: 'updated successfully', result: { id: sim[0].id, deviceId: sim[0].deviceId } });
+      return res.status(200).send({ status: 200, message: 'success', reason: 'updated successfully', result: { id: sim[0].id, deviceId: sim[0].deviceId } });
     } catch (err) {
       console.log(err);
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
     }
   },
 
@@ -170,15 +172,15 @@ module.exports = {
           async.series(series, async function (err) {
             try {
               if (err) {
-                return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+                return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong while downloading the data", result: { error: err.message } });
               }
               return res.xls('data.xlsx', finalData)
             } catch (error) {
-              return res.send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+              return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
             } finally {
               finalData = [];
             }
-            
+
           });
         }
       } else {
@@ -189,10 +191,10 @@ module.exports = {
           'pageNumber': page,
           'data': result
         }
-        return res.send({ status: 200, message: 'success', result: responseJson });
+        return res.status(200).send({ status: 200, message: 'success', result: responseJson });
       }
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
     }
   },
 
@@ -209,9 +211,9 @@ module.exports = {
         return res.send({ status: 400, message: 'failure', reason: 'Invalid query', result: { error: err.message } });
       }
       const result = await executeQuery(query, [value]);
-      return res.send({ status: 200, message: 'success', result: result });
+      return res.status(200).send({ status: 200, message: 'success', result: result });
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
     }
   },
 
@@ -219,9 +221,9 @@ module.exports = {
     try {
       let recordId = req && req.query && req.query.id ? req.query.id : '';
       await executeQuery("DELETE FROM `simDetails` WHERE id=?", [recordId]);
-      return res.send({ status: 200, message: 'success', reason: 'Deleted successfully', result: { id: recordId } });
+      return res.status(200).send({ status: 200, message: 'success', reason: 'Deleted successfully', result: { id: recordId } });
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
     }
   },
 
@@ -231,7 +233,7 @@ module.exports = {
       if (simId && statusId) {
         const recordExists = (await executeQuery("SELECT * from status WHERE id=?", [statusId]))[0];
         if (!recordExists) {
-          return res.send({ status: 400, message: 'failure', reason: "Status Id error" });
+          return res.status(400).send({ status: 400, message: 'failure', reason: "Status Id error" });
         }
         await executeQuery(
           "UPDATE simDetails SET fk_status=?, updateUTC=? WHERE id=?;",
@@ -241,13 +243,13 @@ module.exports = {
             simId
           ]
         );
-        return res.send({ status: 200, message: 'Success', reason: 'state changed' });
+        return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
       } else {
-        return res.send({ status: 400, message: 'failure', reason: "Invalid post data" });
+        return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid post data" });
       }
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ error: err.message });
+      return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
     }
   }
 };

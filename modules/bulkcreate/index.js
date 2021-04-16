@@ -114,13 +114,13 @@ module.exports = {
         }
         async.series(series, async function (err) {
           if (err) {
-            return res.send({ status: 400, message: 'failure', reason: "something went wrong while upload", result: { error: err.message } });
+            return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong while upload", result: { error: err.message } });
           }
-          return res.send({ status: 200, message: 'success', result: 'File uploaded successfully' });
+          return res.status(200).send({ status: 200, message: 'success', result: 'File uploaded successfully' });
         });
-      } else return res.send({ status: 400, message: 'failure', reason: 'Invalid VIN number(s)' });
+      } else return res.status(400).send({ status: 400, reason: 'something went wrong', message: 'failure', reason: 'Invalid VIN number(s)' });
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', error: err.message });
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', error: err.message });
     }
   }
 };

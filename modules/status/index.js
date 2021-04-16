@@ -18,37 +18,37 @@ module.exports = {
             ]
           );
     
-          return res.status(200).send({ message: 'Created successfully', data: { id: result.insertId } });
+          return res.status(200).send({ status: 200, message: 'success', reason: 'Created successfully', data: { id: result.insertId } });
         } catch (err) {
           console.log(err);
-          return res.status(400).send({ error: err.sqlMessage });
+          return res.status(400).send({ status: 400, message: 'failure', reason:'something went wrong', error: err.message });
         }
       },
     
   async list(req, res) {
     try {
       const result = await executeQuery("SELECT * FROM `status`");
-      return res.status(200).send({ data: result });
+      return res.status(200).send({  status: 200, message: 'success', reason: 'Created successfully', data: result });
     } catch (err) {
-      return res.status(500).send({ error: err });
+      return res.status(500).send({ status: 500, message: 'failure', reason:'something went wrong', error: err });
     }
   },
   async deleteAllStatus(req, res){
     console.log("=====insidt========")
     try{
       const result = await executeQuery("DELETE from status");
-        return res.status(200).send({ message: 'Deleted successfully', data: result});
+        return res.status(200).send({  status: 200, message: 'success', message: 'Deleted successfully', data: result});
     } catch(error){
-      console.log("====eerer=====",error)
+      return res.status(400).send({ status: 400, message: 'failure', reason:'something went wrong', error: error.message });
     }
   },
   async delete(req, res) {
     try {
       let recordId = req && req.query && req.query.id ? req.query.id : '';
       await executeQuery("DELETE FROM `status` WHERE id=?", [recordId]);
-      return res.send({ status: 200, message: 'success', reason: 'Deleted successfully', result: { id: recordId } });
+      return res.status(200).send({ status: 200, message: 'success', reason: 'Deleted successfully', result: { id: recordId } });
     } catch (err) {
-      return res.send({ status: 400, message: 'failure', result: { error: err.message } });
+      return res.status(400).send({ status: 400, message: 'failure', reason:'something went wrong', result: { error: err.message } });
     }
   },
 };
