@@ -8,6 +8,7 @@ const bulkCreate = require("../modules/bulkcreate");
 const userRequests = require("../modules/userRequests");
 const requestState = require("../modules/requestState");
 const simSwap = require("../modules/simSwap");
+const notifications = require("../modules/notifications");
 
 module.exports = (app) => {
   app.get("/api/v1/health-check", (req, res) =>
@@ -65,4 +66,8 @@ module.exports = (app) => {
   //simSwap
   app.post("/simmanager/api/v1/simSwap", simSwap.create);
   app.get("/simmanager/api/v1/simSwap", simSwap.list);
+  
+  //notifications
+  app.get("/simmanager/api/v1/notifications", notifications.list);
+
 };

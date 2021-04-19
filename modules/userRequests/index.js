@@ -59,6 +59,18 @@ module.exports = {
         ]
       );
       const request = (await executeQuery("SELECT requestNumber from userRequests WHERE id=?", [result.insertId]))[0];
+      
+      // creating notifications
+      await executeQuery(
+        "INSERT INTO notifications (fk_createdBy, fk_userRequestsId, fk_resolvedBy, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?)",
+        [
+          req.body.fk_createdBy,
+          result.insertId,
+          null,
+          new Date(),
+          new Date()
+        ]
+      );
       return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, requestNumber: request.requestNumber } });
     } catch (err) {
       return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
@@ -241,6 +253,17 @@ module.exports = {
             requestNumber
           ]
         );
+
+        //updating resolvedBy name to the notifications
+        await executeQuery(
+          "UPDATE notifications SET fk_resolvedBy=?, updateUTC=? WHERE fk_userRequestsId=?;",
+          [
+            approvedOrRejectedBy,
+            new Date(),
+            recordExists.id
+          ]
+        );
+
         return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
       } else {
         return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid post data" });
