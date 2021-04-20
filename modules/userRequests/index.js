@@ -62,9 +62,10 @@ module.exports = {
       
       // creating notifications
       await executeQuery(
-        "INSERT INTO notifications (fk_createdBy, fk_userRequestsId, fk_resolvedBy, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO notifications (fk_createdBy, fk_simId, fk_userRequestsId, fk_resolvedBy, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?)",
         [
           req.body.fk_createdBy,
+          req.body.fk_simId,
           result.insertId,
           null,
           new Date(),

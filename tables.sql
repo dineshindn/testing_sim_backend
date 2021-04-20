@@ -141,6 +141,9 @@ CREATE TABLE IF NOT EXISTS `simSwap` (
 
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `isChecked` boolean DEFAULT 1,
+  `fk_simId` bigint(20) NULL,
+  FOREIGN KEY (`fk_simId`) REFERENCES `simDetails` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `fk_createdBy` bigint(20) NULL,
   FOREIGN KEY (`fk_createdBy`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `fk_userRequestsId` bigint(20) NULL,
