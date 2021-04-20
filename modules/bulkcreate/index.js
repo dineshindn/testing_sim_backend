@@ -7,10 +7,10 @@ var _ = require('lodash');
 var async = require('async');
 const authTokenUrl = process.env.AUTH_TOKEN_URL;
 const basicToken = process.env.BASIC_TOKEN;
-const getVinDetailsUrl = process.env.GET_VIN_DETAILS_URL
+const getDeviceIdDetailsUrl = process.env.GET_DEVICE_DETAILS_URL
 
 
-const fetchVinDetails = async (vin, uid, clientID) => {
+const fetchDeviceIdDetails = async (deviceIds, uid, clientID) => {
   try {
     let headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -22,9 +22,9 @@ const fetchVinDetails = async (vin, uid, clientID) => {
     });
     const tokenDetailsData = await tokenDetails.json();
     if (tokenDetailsData && tokenDetailsData.access_token) {
-      const response = await fetch(getVinDetailsUrl, {
+      const response = await fetch(getDeviceIdDetailsUrl, {
         method: 'Post',
-        body: JSON.stringify({ vin, uid, clientID }),
+        body: JSON.stringify({ "deviceid": deviceIds }),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + tokenDetailsData.access_token
@@ -75,18 +75,17 @@ module.exports = {
   async simBulkUpload(req, res) {
     try {
       if (!req.files || (req.files && !req.files.file)) return res.send({ status: 400, message: 'failure', reason: 'File Missing' });
-      if (!req.body.uid) return res.send({ status: 400, message: 'failure', reason: 'Missing uid value' });
-      if (!req.body.clientID) return res.send({ status: 400, message: 'failure', reason: 'Missing clientID' });
+      if (!req.body.uid) return res.status(400).send({ status: 400, message: 'failure', reason: 'Missing uid value' });
+      if (!req.body.clientID) return res.status(400).send({ status: 400, message: 'failure', reason: 'Missing clientID' });
 
       const sampleFile = req.files.file;
       const fileName = Date.now() + "_" + crypto.randomBytes(8).toString("hex") + "_" + sampleFile.name;
       const filePath = './uploads/' + fileName;
       await sampleFile.mv(filePath);
       const { rows, errors } = await readXlsxFile(filePath, { schema: simCreate });
-      if (errors && errors.length >= 1) return res.send({ status: 400, message: 'failure', reason: 'Detials incorrect or missing' });
-
-      const allVinDetails = await fetchVinDetails(
-        rows.map(t => t.vinMsnNumber.toString()).filter((x, i, a) => a.indexOf(x) === i), req.body.uid, req.body.clientID);
+      if (errors && errors.length >= 1) return res.status(400).send({ status: 400, message: 'failure', reason: 'Detials incorrect or missing', error: errors });
+      const allVinDetails = await fetchDeviceIdDetails(
+        rows.map(t => t.deviceId.toString()).filter((x, i, a) => a.indexOf(x) === i), req.body.uid, req.body.clientID);
 
       if (allVinDetails) {
         const allStatus = await executeQuery("SELECT * from status;");
@@ -94,24 +93,22 @@ module.exports = {
         const allProviders = await executeQuery("SELECT * from networkProvider;");
         let currentRow = {};
         let series = [];
-        for (i = 0; i <= rows.length - 1; i++) {
-          currentRow = rows[i];
-
+        rows.forEach(currentRow => {
           let statusIndex = _.findIndex(allStatus, { name: currentRow.fk_status });
           currentRow.fk_status = allStatus[statusIndex].id;
 
           let oemIndex = _.findIndex(allOem, { name: currentRow.fk_oem })
-          if (oemIndex === -1) return res.send({ status: 400, message: 'failure', reason: 'Invalid customer name in the file' });
+          if (oemIndex === -1) return res.status(400).send({ status: 400, message: 'failure', reason: 'Invalid customer name in the file' });
           currentRow.fk_oem = allOem[oemIndex].id;
 
           let providerIndex = _.findIndex(allProviders, { name: currentRow.fk_networkProviderId });
-          if (providerIndex === -1) return res.send({ status: 400, message: 'failure', reason: 'Invalid service provider in the file' });
+          if (providerIndex === -1) return res.status(400).send({ status: 400, message: 'failure', reason: 'Invalid service provider in the file' });
           currentRow.fk_networkProviderId = allProviders[providerIndex].id;
 
           series.push(next => {
             insertIntoSimTable(currentRow, next);
           });
-        }
+        });
         async.series(series, async function (err) {
           if (err) {
             return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong while upload", result: { error: err.message } });
