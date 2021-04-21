@@ -69,5 +69,5 @@ module.exports = (app) => {
   
   //notifications
   app.get("/simmanager/api/v1/notifications", notifications.list);
-  app.post("/simmanager/api/v1/getNotificationById", notifications.getNotificationById);
+  app.post("/simmanager/api/v1/markAsRead", notifications.markAsRead);
 };
