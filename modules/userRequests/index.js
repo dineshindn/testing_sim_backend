@@ -14,10 +14,10 @@ const getReport = async (rowData, next) => {
     const assignedName = await executeQuery(`SELECT firstName FROM users WHERE id=?;`, [rowData.fk_assignedTo]);
     const createdName = await executeQuery(`SELECT firstName FROM users WHERE id=?;`, [rowData.fk_createdBy]);
     const sim = await executeQuery(`SELECT simNumber FROM simDetails WHERE id=?;`, [rowData.fk_simId]);
-    if (reqState && reqState[0].name) rowData['requested state'] = reqState[0].name;
-    if (assignedName && assignedName[0].firstName) rowData['assigned to'] = assignedName[0].firstName;
-    if (createdName && createdName[0].firstName) rowData['created by'] = createdName[0].firstName;
-    if (sim && sim[0].simNumber) rowData['sim number'] = sim[0].simNumber;
+    rowData['requested state'] = reqState && reqState.length && reqState[0] && reqState[0].name ? reqState[0].name : '';
+    rowData['assigned to'] = assignedName && assignedName.length && assignedName[0] && assignedName[0].firstName ? assignedName[0].firstName : '';
+    rowData['created by'] = createdName && createdName.length && createdName[0] && createdName[0].firstName ? createdName[0].firstName : '';
+    if (sim && sim[0].simNumber) rowData['sim number'] = sim && sim.length && sim[0] && sim[0].simNumber ? sim[0].simNumber : '';
     rowData['Created at'] = rowData.insertUTC;
     rowData['Last updated'] = rowData.updateUTC;
     delete rowData.fk_requestedState;
