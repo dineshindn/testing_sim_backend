@@ -106,7 +106,6 @@ module.exports = {
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
       const sort = req && req.query && req.query.page ? req.query.sort : '';
-
       var offset;
       offset = (page - 1) * limit;
       offset = Number.isNaN(offset) ? 0 : offset;
@@ -138,24 +137,34 @@ module.exports = {
         } else if (imeiNumber) {
           query = `SELECT * FROM simDetails WHERE imeiNumber REGEXP ${imeiNumber} limit ${limit} offset ${offset};`;
           value = imeiNumber;
-        } else if (status) {
-          if (status === 'ALL') {
-            query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`
-          } else {
-            const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
-            let _id = statusId && statusId.id ? statusId.id : ''
-            query = `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset};`;
-            value = _id;
-          }
         }
+        // else if (status) {
+        //   if (status === 'ALL') {
+        //     query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`
+        //   } else {
+        //     const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
+        //     let _id = statusId && statusId.id ? statusId.id : ''
+        //     query = `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset};`;
+        //     value = _id;
+        //   }
+        // }
         else if (stateChangeDate || stateChangeDateSort) {
           query = stateChangeDateSort ? `SELECT * FROM simDetails ORDER BY stateChangeDate ${stateChangeDateSort};` : `SELECT * FROM simDetails WHERE stateChangeDate=?`;
           value = stateChangeDate;
         } else if (dispatchDate || dispatchDateSort) {
           query = dispatchDateSort ? `SELECT * FROM simDetails ORDER BY dispatchDate ${dispatchDateSort};` : `SELECT * FROM simDetails WHERE dispatchDate=?`;
           value = dispatchDate;
-        } else if (from && to) {
-          query = `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+        } else if (status || from && to) {
+          if (status === 'ALL') {
+            query = status === 'ALL' && !from && !to ? `SELECT * FROM simDetails limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+          } else {
+            const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
+            let _id = statusId && statusId.id ? statusId.id : ''
+            query = !from && !to ? `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE fk_status=? AND insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+            value = _id;
+          }
+          // console.log("====inside the from and to====")
+          // query = `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
         }
       } else {
         query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`;
