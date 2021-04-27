@@ -71,6 +71,14 @@ module.exports = {
           new Date()
         ]
       );
+      //updating isRequested filed in the simDetials
+      await executeQuery(
+        "UPDATE simDetails SET isRequested=? WHERE id=?;",
+        [
+          1,
+          req.body.fk_simId
+        ]
+      );
       return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, requestNumber: request.requestNumber } });
     } catch (err) {
       return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
@@ -263,7 +271,15 @@ module.exports = {
             recordExists.id
           ]
         );
-
+        const simId = await executeQuery(`SELECT fk_simId FROM userRequests where requestNumber=?;`,[requestNumber]);
+        //updating isRequested field in the simDetials after resolving the userRequests
+        await executeQuery(
+          "UPDATE simDetails SET isRequested=? WHERE id=?;",
+          [
+            0,
+            simId[0].fk_simId
+          ]
+        );
         return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
       } else {
         return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid post data" });
