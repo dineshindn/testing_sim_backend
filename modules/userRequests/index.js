@@ -148,8 +148,8 @@ module.exports = {
             const reqStateId = (await executeQuery(`SELECT id FROM requestStatus WHERE name REGEXP '${requestedState}';`))[0]
             let _id = reqStateId && reqStateId.id ? reqStateId.id : ''
             query = `SELECT * FROM userRequests WHERE fk_requestedState=? limit ${limit} offset ${offset};`;
+            value = _id;
           }
-          value = _id;
         }
         // else if (requestedStateSort) {
         //   const reqStateId = (await executeQuery(`SELECT id FROM requestStatus WHERE name=?`, [requestedStateSort]))[0];
