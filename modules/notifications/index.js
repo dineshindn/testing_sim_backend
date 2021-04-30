@@ -3,7 +3,7 @@ const executeQuery = require('../../database');
 module.exports = {
   async list(req, res) {
     try {
-      const result = await executeQuery("SELECT notifications.*, userRequests.requestNumber FROM `notifications` LEFT JOIN `userRequests` ON notifications.fk_userRequestsId = userRequests.id " );
+      const result = await executeQuery("SELECT notifications.*, userRequests.requestNumber FROM `notifications` LEFT JOIN `userRequests` ON notifications.fk_userRequestsId = userRequests.id WHERE isRead=0" );
 
       // const result = await executeQuery("SELECT notifications.*, userRequests.requestNumber, users.firstName AS createdByName FROM `notifications` LEFT JOIN `userRequests` ON notifications.fk_userRequestsId = userRequests.id LEFT JOIN `users` ON notifications.fk_createdBy = users.id AND fk_resolvedBy" );
       return res.status(200).send({ status: 200, message: 'Success', data: result });
