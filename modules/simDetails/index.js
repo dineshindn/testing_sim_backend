@@ -1,11 +1,15 @@
 const executeQuery = require("../../database");
 var async = require('async');
 var _ = require('lodash');
+const fetch = require('node-fetch');
+const STATE_CHANGE_API = process.env.STATE_CHANGE_API;
+const authTokenUrl = process.env.AUTH_TOKEN_URL;
+const basicToken = process.env.BASIC_TOKEN;
 
 
 const {
   formSetClause
-} = require('../../utils')
+} = require('../../utils');
 
 let finalData = [];
 const getReport = async (rowData, next) => {
@@ -37,7 +41,7 @@ const getReport = async (rowData, next) => {
 }
 
 const rolesRestrictions = async (role, result) => {
-  return new Promise((resolve, reject) =>{
+  return new Promise((resolve, reject) => {
     result.forEach((e) => {
       switch (role) {
         case 'warehouse':
@@ -90,7 +94,7 @@ const rolesRestrictions = async (role, result) => {
 }
 
 const rolesRestrictionsForDownload = async (role, result) => {
-  return new Promise((resolve, reject) =>{
+  return new Promise((resolve, reject) => {
     result.forEach((e) => {
       switch (role) {
         case 'warehouse':
@@ -225,7 +229,7 @@ module.exports = {
   async list(req, res) {
     try {
       const { simNumber, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, status, dispatchDateSort, from, to, isDownload, role } = req && req.query ? req.query : {};
-       if (role) {
+      if (role) {
         const limit = req && req.query && req.query.limit ? req.query.limit : 10;
         const page = req && req.query && req.query.page ? req.query.page : 1;
         const sort = req && req.query && req.query.page ? req.query.sort : '';
@@ -387,15 +391,49 @@ module.exports = {
           if (!recordExists) {
             return res.status(400).send({ status: 400, message: 'failure', reason: "Status Id error" });
           }
-          await executeQuery(
-            "UPDATE simDetails SET fk_status=?, updateUTC=? WHERE id=?;",
-            [
-              statusId,
-              new Date(),
-              simId
-            ]
-          );
-          return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
+          const simExists = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [simId]))[0];
+          if (simExists && simExists.deviceId) {
+
+            let headers = {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': 'Basic ' + basicToken
+            }
+            const tokenDetails = await fetch(authTokenUrl, {
+              method: 'Post',
+              headers: headers
+            });
+            const tokenDetailsData = await tokenDetails.json();
+            if (tokenDetailsData && tokenDetailsData.access_token) {
+              let device = [];
+              device.push(simExists.deviceId)
+              const responseData = await fetch(STATE_CHANGE_API, {
+                method: 'Post',
+                body: { DeviceId: device },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + tokenDetailsData.access_token
+                }
+              });
+              const resData = await responseData.json();
+              if (resData && resData.status === 'success') {
+                await executeQuery(
+                  "UPDATE simDetails SET fk_status=?, updateUTC=? WHERE id=?;",
+                  [
+                    statusId,
+                    new Date(),
+                    simId
+                  ]
+                );
+                return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
+              } else {
+                return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid device id" });
+              }
+            } else throw 'Authentication Failure: Unable to authenticate to device Id api.';
+
+
+          } else {
+            return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid device id" });
+          }
         } else {
           return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid post data" });
         }
