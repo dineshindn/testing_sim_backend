@@ -228,24 +228,32 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const { simNumber, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, status, dispatchDateSort, from, to, isDownload, role } = req && req.query ? req.query : {};
+      const { simNumber, withoutDeviceId, withDeviceId, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, status, dispatchDateSort, from, to, isDownload, role } = req && req.query ? req.query : {};
+
       if (role) {
         const limit = req && req.query && req.query.limit ? req.query.limit : 10;
         const page = req && req.query && req.query.page ? req.query.page : 1;
-        const sort = req && req.query && req.query.page ? req.query.sort : '';
         var offset;
         offset = (page - 1) * limit;
         offset = Number.isNaN(offset) ? 0 : offset;
         let value;
         let query;
-        if (simNumber || deviceId || mobileNumber || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || status || deviceIdSort || dispatchDateSort || from || to) {
+        if (simNumber || deviceId || mobileNumber || withDeviceId || withoutDeviceId || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || status || deviceIdSort || dispatchDateSort || from || to) {
           if (simNumber) {
             query = `SELECT * FROM simDetails WHERE simNumber REGEXP ${simNumber} limit ${limit} offset ${offset};`;
             value = simNumber;
           } else if (deviceId || deviceIdSort) {
             query = deviceIdSort ? `SELECT * FROM simDetails ORDER BY deviceId ${deviceIdSort};` : `SELECT * FROM simDetails WHERE deviceId REGEXP '${deviceId}' limit ${limit} offset ${offset};`;
-            value = deviceId;
-          } else if (mobileNumber) {
+            value = deviceId;            
+          } 
+            else if (withoutDeviceId){
+              query =  `SELECT * FROM simDetails WHERE deviceId=? limit ${limit} offset ${offset};`
+              value = '';
+            }
+            else if (withDeviceId){
+              query =  `SELECT * FROM simDetails where ORD(deviceId) > 0 limit ${limit} offset ${offset};`
+            }
+            else if (mobileNumber) {
             query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP ${mobileNumber} limit ${limit} offset ${offset};`;
             value = mobileNumber;
           } else if (networkProviderId) {
