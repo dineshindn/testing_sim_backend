@@ -21,7 +21,9 @@ module.exports = {
             return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
           }
           const resp = await executeQuery(`SELECT COUNT(*) AS totalSimCards FROM simDetails;`);
-          return res.status(200).send({ status: 200, message: 'success', totalSimCards: resp[0].totalSimCards, result: finalData });
+          const noDeviceCount = await executeQuery(`SELECT COUNT(*) AS withoutDevice FROM simDetails where deviceId=?;`,['']);
+          const deviceCount = await executeQuery(`SELECT COUNT(*) AS withDevice FROM simDetails where ORD(deviceId) > 0;`);
+          return res.status(200).send({ status: 200, message: 'success', totalSimCards: resp[0].totalSimCards, withoutDeviceId: noDeviceCount[0].withoutDevice, withDeviceId: deviceCount[0].withDevice  ,result: finalData });
         });
       } else {
         return res.status(400).send({ status: 400, message: 'failure', reason: "No record found" });
