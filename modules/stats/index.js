@@ -23,6 +23,8 @@ module.exports = {
           const resp = await executeQuery(`SELECT COUNT(*) AS totalSimCards FROM simDetails;`);
           const noDeviceCount = await executeQuery(`SELECT COUNT(*) AS withoutDevice FROM simDetails where deviceId=?;`,['']);
           const deviceCount = await executeQuery(`SELECT COUNT(*) AS withDevice FROM simDetails where ORD(deviceId) > 0;`);
+
+          finalData.push({withoutDevice : noDeviceCount[0].withoutDevice}, {withDevice : deviceCount[0].withDevice}, {totalSimCards : resp[0].totalSimCards})
           return res.status(200).send({ status: 200, message: 'success', totalSimCards: resp[0].totalSimCards, withoutDeviceId: noDeviceCount[0].withoutDevice, withDeviceId: deviceCount[0].withDevice  ,result: finalData });
         });
       } else {

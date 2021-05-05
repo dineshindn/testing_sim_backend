@@ -245,15 +245,7 @@ module.exports = {
           } else if (deviceId || deviceIdSort) {
             query = deviceIdSort ? `SELECT * FROM simDetails ORDER BY deviceId ${deviceIdSort};` : `SELECT * FROM simDetails WHERE deviceId REGEXP '${deviceId}' limit ${limit} offset ${offset};`;
             value = deviceId;            
-          } 
-            else if (withoutDeviceId){
-              query =  `SELECT * FROM simDetails WHERE deviceId=? limit ${limit} offset ${offset};`
-              value = '';
-            }
-            else if (withDeviceId){
-              query =  `SELECT * FROM simDetails where ORD(deviceId) > 0 limit ${limit} offset ${offset};`
-            }
-            else if (mobileNumber) {
+          } else if (mobileNumber) {
             query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP ${mobileNumber} limit ${limit} offset ${offset};`;
             value = mobileNumber;
           } else if (networkProviderId) {
@@ -292,11 +284,16 @@ module.exports = {
           } else if (status || from && to) {
             if (status === 'ALL') {
               query = status === 'ALL' && !from && !to ? `SELECT * FROM simDetails limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
-            } else {
+            } else if (status != 'withDevice' && status != 'withoutDevice') {
               const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
               let _id = statusId && statusId.id ? statusId.id : ''
               query = !from && !to ? `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE fk_status=? AND insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
               value = _id;
+            } else if (status === 'withoutDevice') {
+              query = `SELECT * FROM simDetails WHERE deviceId=? limit ${limit} offset ${offset};`
+              value = '';
+            } else if (status === 'withDevice') {
+              query = `SELECT * FROM simDetails where ORD(deviceId) > 0 limit ${limit} offset ${offset};`
             }
             // console.log("====inside the from and to====")
             // query = `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
