@@ -172,8 +172,8 @@ module.exports = {
             new Date()
           ]
         );
-        const sim = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [result.insertId]))[0];
-        return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, deviceId: sim.deviceId } });
+        const sim = (await executeQuery("SELECT deviceId, simNumber from simDetails WHERE id=?", [result.insertId]))[0];
+        return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, deviceId: sim.deviceId , simNumber: sim.simNumber} });
       } catch (err) {
         //return res.send({ status: 400, message: 'failure', result: { error: err.message } });
         return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', error: err.message });
