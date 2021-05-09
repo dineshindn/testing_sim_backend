@@ -11,12 +11,12 @@ let finalData = [];
 const getReport = async (rowData, next) => {
   try {
     const reqState = await executeQuery(`SELECT name FROM requestStatus WHERE id=?;`, [rowData.fk_requestedState]);
-    const assignedName = await executeQuery(`SELECT firstName FROM users WHERE id=?;`, [rowData.fk_assignedTo]);
-    const createdName = await executeQuery(`SELECT firstName FROM users WHERE id=?;`, [rowData.fk_createdBy]);
+    const assignedName = await executeQuery(`SELECT userName FROM users WHERE id=?;`, [rowData.fk_assignedTo]);
+    const createdName = await executeQuery(`SELECT userName FROM users WHERE id=?;`, [rowData.fk_createdBy]);
     const sim = await executeQuery(`SELECT simNumber FROM simDetails WHERE id=?;`, [rowData.fk_simId]);
     rowData['requested state'] = reqState && reqState.length && reqState[0] && reqState[0].name ? reqState[0].name : '';
-    rowData['assigned to'] = assignedName && assignedName.length && assignedName[0] && assignedName[0].firstName ? assignedName[0].firstName : '';
-    rowData['created by'] = createdName && createdName.length && createdName[0] && createdName[0].firstName ? createdName[0].firstName : '';
+    rowData['assigned to'] = assignedName && assignedName.length && assignedName[0] && assignedName[0].userName ? assignedName[0].userName : '';
+    rowData['created by'] = createdName && createdName.length && createdName[0] && createdName[0].userName ? createdName[0].userName : '';
     if (sim && sim[0].simNumber) rowData['sim number'] = sim && sim.length && sim[0] && sim[0].simNumber ? sim[0].simNumber : '';
     rowData['Created at'] = rowData.insertUTC;
     rowData['Last updated'] = rowData.updateUTC;
@@ -166,12 +166,12 @@ module.exports = {
           query = resolutionSort ? `SELECT * FROM userRequests ORDER BY resolution ${resolutionSort} limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE resolution REGEXP '${resolution}' limit ${limit} offset ${offset};`;
           value = resolution;
         } else if (assignedTo) {
-          const assignedId = (await executeQuery(`SELECT id FROM users WHERE firstName REGEXP '${assignedTo}';`))[0]
+          const assignedId = (await executeQuery(`SELECT id FROM users WHERE userName REGEXP '${assignedTo}';`))[0]
           let _id = assignedId && assignedId.id ? assignedId.id : ''
           query = `SELECT * FROM userRequests WHERE fk_assignedTo=? limit ${limit} offset ${offset};`;
           value = _id;
         } else if (createdBy) {
-          const createdById = (await executeQuery(`SELECT id FROM users WHERE firstName REGEXP '${createdBy}';`))[0]
+          const createdById = (await executeQuery(`SELECT id FROM users WHERE userName REGEXP '${createdBy}';`))[0]
           let _id = createdById && createdById.id ? createdById.id : ''
           query = `SELECT * FROM userRequests WHERE fk_createdBy=? limit ${limit} offset ${offset};`;
           value = _id;
@@ -233,6 +233,7 @@ module.exports = {
         const userData = await executeQuery(`SELECT * FROM simDetails WHERE id=?`, [result[0].fk_simId]);
         if (userData && userData.length) result.push(userData[0]);
       }
+      console.log("=====result======",result)
       return res.status(200).send({ status: 200, message: 'success', result: result });
     } catch (err) {
       return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });

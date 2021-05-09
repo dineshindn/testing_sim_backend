@@ -1,0 +1,6 @@
+{
+  "1": ["column1", "column2", "column3", "column4", "column5"],
+  "2": ["column1", "column2", "column3"],
+  "3": ["column1", "column2"],
+  "4": ["column1"]
+}

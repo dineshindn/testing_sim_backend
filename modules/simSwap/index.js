@@ -25,7 +25,7 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const result = await executeQuery("SELECT simSwap.*, users.firstName, simDetails.deviceId as oldSimDeviceId FROM `simSwap` LEFT JOIN `users` ON simSwap.fk_createdBy = users.id LEFT JOIN `simDetails` ON fk_oldSim = simDetails.id" );
+      const result = await executeQuery("SELECT simSwap.*, users.userName, simDetails.deviceId as oldSimDeviceId FROM `simSwap` LEFT JOIN `users` ON simSwap.fk_createdBy = users.id LEFT JOIN `simDetails` ON fk_oldSim = simDetails.id" );
       //const result = await executeQuery("SELECT * FROM `simSwap`");
       return res.status(200).send({ status: 200, message: 'success', data: result });
     } catch (err) {

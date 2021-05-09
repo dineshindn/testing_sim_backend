@@ -31,12 +31,9 @@ CREATE TABLE IF NOT EXISTS `networkProvider` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `firstName` varchar(15) NOT NULL,
-  `lastName` varchar(15) NOT NULL,
+  `userName` varchar(30) NOT NULL,
+  `uuid` varchar(250) NOT NULL,
   `role` tinyint(20) NOT NULL,
-  `fk_oem` bigint(20) NULL,
-  FOREIGN KEY (`fk_oem`) REFERENCES oem(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  `mobileNumber` varchar(15) NOT NULL,
   `insertUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updateUTC` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `email` varchar(50) NOT NULL
