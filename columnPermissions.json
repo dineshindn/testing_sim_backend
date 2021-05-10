@@ -1,6 +1,41 @@
 {
-  "1": ["column1", "column2", "column3", "column4", "column5"],
-  "2": ["column1", "column2", "column3"],
-  "3": ["column1", "column2"],
-  "4": ["column1"]
+  "1": [
+    "vin",
+    "registrationNumber",
+    "deviceId",
+    "subscriptionStatus",
+    "simNumber",
+    "deviceSerialNumber",
+    "imeiNumber",
+    "mobileNumber",
+    "customerName",
+    "serviceProvider",
+    "simStatus",
+    "networkProvider"
+  ],
+  "2": [
+    "vin",
+    "registrationNumber",
+    "deviceId",
+    "subscriptionStatus",
+    "simNumber",
+    "deviceSerialNumber",
+    "imeiNumber",
+    "mobileNumber",
+    "customerName",
+    "serviceProvider",
+    "simStatus"
+  ],
+  "3": [
+    "vin",
+    "deviceId",
+    "simNumber",
+    "mobileNumber",
+    "serviceProvider"
+  ],
+  "4": [
+    "vin",
+    "deviceId",
+    "simStatus"
+  ]
 }
