@@ -50,7 +50,7 @@ module.exports = {
 
   async delete(req, res) {
     try {
-      await executeQuery("DELETE FROM `users` WHERE id=?", [req.params.id]);
+      await executeQuery("DELETE FROM `users` WHERE id=?", [req.query.id]);
       return res.status(200).send({ status: 200, message: 'Success', reason: "Deleted Successfully" });
     } catch (err) {
       return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', error: err.message });
