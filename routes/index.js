@@ -9,6 +9,7 @@ const userRequests = require("../modules/userRequests");
 const requestState = require("../modules/requestState");
 const simSwap = require("../modules/simSwap");
 const notifications = require("../modules/notifications");
+const simTransactionHistory = require("../modules/simTransactionHistory");
 
 module.exports = (app) => {
   app.get("/api/v1/health-check", (req, res) =>
@@ -70,4 +71,8 @@ module.exports = (app) => {
   //notifications
   app.get("/simmanager/api/v1/notifications", notifications.list);
   app.post("/simmanager/api/v1/markAsRead", notifications.markAsRead);
+
+  //simTransactionHistory
+  app.get("/simmanager/api/v1/simTransactionHistory", simTransactionHistory.list);
+
 };

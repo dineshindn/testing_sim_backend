@@ -8,7 +8,8 @@ const basicToken = process.env.BASIC_TOKEN;
 
 
 const {
-  formSetClause
+  formSetClause,
+  simTransactionsFormSetClause
 } = require('../../utils');
 
 let finalData = [];
@@ -207,14 +208,17 @@ module.exports = {
       ];
       try {
         let { setClause, values } = await formSetClause(req.body, whiteListedColumns);
+        let { simSetClause, _values } = await simTransactionsFormSetClause(req.body, whiteListedColumns);
         setClause += ', updateUTC=?';
         const sim = (await executeQuery("SELECT * from simDetails WHERE id=?", [req.query.id]));
         if (sim && sim.length === 0) return res.status(404).send({ error: "Record not found" });
 
         let updateQuery = `UPDATE simDetails` + setClause + " WHERE id=?";
+        let updateSimTransaction = `INSERT INTO simTransactionHistory (`+ simSetClause +`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         values.push(new Date());
         values.push(sim[0].id);
-        const result = await executeQuery(updateQuery, values);
+        await executeQuery(updateQuery, values);
+        await executeQuery(updateSimTransaction, _values);
         return res.status(200).send({ status: 200, message: 'success', reason: 'updated successfully', result: { id: sim[0].id, deviceId: sim[0].deviceId } });
       } catch (err) {
         console.log(err);
