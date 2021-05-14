@@ -146,6 +146,45 @@ const rolesRestrictionsForDownload = async (role, result) => {
     });
   });
 }
+
+const updateSimTransactionHistory = async (simId) => {
+  if (simId) {
+    try {
+      const simDetails = await executeQuery("SELECT * FROM `simDetails` WHERE id=?", [simId]);
+      if (simDetails && simDetails.length) {
+        delete simDetails[0].id;
+        delete simDetails[0].updateUTC;
+        delete simDetails[0].insertUTC;
+        const whiteListedColumns = [
+          "deviceId",
+          "simNumber",
+          "deviceSerialNumber",
+          "imeiNumber",
+          "fk_networkProviderId",
+          "fk_oem",
+          "vinMsnNumber",
+          "registrationNumber",
+          "subscriptionStatus",
+          "subscriptionEndDate",
+          "mobileNumber",
+          "fk_status",
+          "stateChangeDate",
+          "dispatchDate",
+          "isRequested"
+        ];
+        let { simSetClause, _values } = await simTransactionsFormSetClause(simDetails[0], whiteListedColumns);
+        let updateSimTransaction = `INSERT INTO simTransactionHistory (` + simSetClause + `) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        await executeQuery(updateSimTransaction, _values);
+      }
+      return 0;
+    } catch (err) {
+      throw 'Sim Transaction history failure';
+    }
+  } else {
+    throw 'Sim Transaction history failure : No sim id found';
+  }
+}
+
 module.exports = {
 
   async create(req, res) {
@@ -188,8 +227,6 @@ module.exports = {
 
   async update(req, res) {
     if (req.query && req.query.role) {
-
-
       const whiteListedColumns = [
         "deviceId",
         "simNumber",
@@ -205,6 +242,7 @@ module.exports = {
         "fk_status",
         "stateChangeDate",
         "dispatchDate",
+        "isRequested"
       ];
       try {
         let { setClause, values } = await formSetClause(req.body, whiteListedColumns);
@@ -214,7 +252,7 @@ module.exports = {
         if (sim && sim.length === 0) return res.status(404).send({ error: "Record not found" });
 
         let updateQuery = `UPDATE simDetails` + setClause + " WHERE id=?";
-        let updateSimTransaction = `INSERT INTO simTransactionHistory (`+ simSetClause +`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        let updateSimTransaction = `INSERT INTO simTransactionHistory (`+ simSetClause +`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         values.push(new Date());
         values.push(sim[0].id);
         await executeQuery(updateQuery, values);
@@ -392,7 +430,7 @@ module.exports = {
 
   async simStateChange(req, res) {
     if (req.query && req.query.role) {
-
+      
       try {
         const { simId, statusId } = req.body ? req.body : {};
         if (simId && statusId) {
@@ -433,6 +471,9 @@ module.exports = {
                     simId
                   ]
                 );
+                // updating to simTransactionHistoryTable
+                await updateSimTransactionHistory(simId);
+
                 return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
               } else {
                 return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid device id" });
