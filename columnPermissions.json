@@ -1,6 +1,6 @@
 {
   "1": [
-    "vin",
+    "vinMsnNumber",
     "registrationNumber",
     "deviceId",
     "subscriptionStatus",
@@ -8,13 +8,12 @@
     "deviceSerialNumber",
     "imeiNumber",
     "mobileNumber",
-    "customerName",
-    "serviceProvider",
-    "simStatus",
-    "networkProvider"
+    "fk_oem",
+    "fk_networkProviderId",
+    "fk_status"
   ],
   "2": [
-    "vin",
+    "vinMsnNumber",
     "registrationNumber",
     "deviceId",
     "subscriptionStatus",
@@ -22,20 +21,20 @@
     "deviceSerialNumber",
     "imeiNumber",
     "mobileNumber",
-    "customerName",
-    "serviceProvider",
-    "simStatus"
+    "fk_oem",
+    "fk_networkProviderId",
+    "fk_status"
   ],
   "3": [
-    "vin",
+    "vinMsnNumber",
     "deviceId",
     "simNumber",
     "mobileNumber",
-    "serviceProvider"
+    "fk_networkProviderId"
   ],
   "4": [
-    "vin",
+    "vinMsnNumber",
     "deviceId",
-    "simStatus"
+    "fk_status"
   ]
 }
