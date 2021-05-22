@@ -1,40 +1,40 @@
 {
   "1": [
-    "vinMsnNumber",
-    "registrationNumber",
     "deviceId",
-    "subscriptionStatus",
     "simNumber",
+    "vinMsnNumber",
+    "subscriptionStatus",
+    "fk_status",
+    "registrationNumber",
     "deviceSerialNumber",
     "imeiNumber",
     "mobileNumber",
     "fk_oem",
-    "fk_networkProviderId",
-    "fk_status"
+    "fk_networkProviderId"
   ],
   "2": [
-    "vinMsnNumber",
-    "registrationNumber",
     "deviceId",
-    "subscriptionStatus",
     "simNumber",
+    "vinMsnNumber",
+    "subscriptionStatus",
+    "fk_status",
+    "registrationNumber",
     "deviceSerialNumber",
     "imeiNumber",
     "mobileNumber",
     "fk_oem",
-    "fk_networkProviderId",
-    "fk_status"
+    "fk_networkProviderId"
   ],
   "3": [
-    "vinMsnNumber",
     "deviceId",
     "simNumber",
+    "vinMsnNumber",
     "mobileNumber",
     "fk_networkProviderId"
   ],
   "4": [
-    "vinMsnNumber",
     "deviceId",
-    "fk_status"
+    "fk_status",
+    "vinMsnNumber"
   ]
 }
