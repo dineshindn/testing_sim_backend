@@ -30,6 +30,7 @@ module.exports = (app) => {
   app.patch("/simmanager/api/v1/simDetails", simDetails.update);
   app.get("/simmanager/api/v1/getSimDetailsById", simDetails.getSimDetailsById);
   app.post("/simmanager/api/v1/simStateChange", simDetails.simStateChange);
+  app.post("/simmanager/api/v1/multipleSimStateChange", simDetails.multipleSimStateChange);
 
   //oem
   app.get("/simmanager/api/v1/oem", oem.list);

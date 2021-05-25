@@ -41,6 +41,45 @@ const getReport = async (rowData, next) => {
   }
 }
 
+const updateMultiStates = async (id, statusId, tokenDetailsData) => {
+  try {
+
+    const simExists = ( await executeQuery("SELECT deviceId from simDetails WHERE id=?", [id]))[0];
+    if (simExists && simExists.deviceId) {
+       if (tokenDetailsData && tokenDetailsData.access_token) {
+        let device = [];
+        device.push(simExists.deviceId)
+        const responseData =  await fetch(STATE_CHANGE_API, {
+          method: 'Post',
+          body: { DeviceId: device },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + tokenDetailsData.access_token
+          }
+        });
+        const resData =  await responseData.json();
+        if (resData && resData.status === 'success') {
+          await executeQuery(
+            "UPDATE simDetails SET fk_status=?, updateUTC=? WHERE id=?;",
+            [
+              statusId,
+              new Date(),
+              id
+            ]
+          );
+          // updating to simTransactionHistoryTable
+          await updateSimTransactionHistory(id);
+        } else {
+        }
+       } else throw 'Authentication Failure: Unable to authenticate to device Id api.';
+
+    } else {
+    }
+  } catch (_err) {
+    console.log("Error occured while updating the sim state", _err)
+  }
+}
+
 const rolesRestrictions = async (role, result) => {
   return new Promise((resolve, reject) => {
     result.forEach((e) => {
@@ -495,5 +534,56 @@ module.exports = {
       return res.status(401).send({ status: 401, message: 'failure', reason: "UnAuthorised access" });
 
     }
+  },
+
+  //multiple sim state change 
+  async multipleSimStateChange(req, res) {
+    if (req.query && req.query.role) {
+
+      try {
+        const ids = req.body && req.body.simIds ? req.body.simIds : [];
+        const { statusId } = req.body ? req.body : {};
+        if (ids && ids.length && statusId) {
+          const recordExists = (await executeQuery("SELECT * from status WHERE id=?", [statusId]))[0];
+          if (!recordExists) {
+            return res.status(400).send({ status: 400, message: 'failure', reason: "Status Id error" });
+          }
+          let headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + basicToken
+          }
+          const tokenDetails = await fetch(authTokenUrl, {
+            method: 'Post',
+            headers: headers
+          });
+          const tokenDetailsData =  await tokenDetails.json();
+          let series = [];
+          ids.forEach((id) => {
+            series.push(async (next) => {
+             await updateMultiStates(id, statusId ,tokenDetailsData);
+            });
+          })
+          async.series(series, async function (err) {
+            try {
+              if (err) {
+                return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+              }
+              return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
+            } catch (error) {
+              return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: error.message } });
+            }
+          });
+        } else {
+          return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid post data" });
+        }
+      } catch (err) {
+        console.log(err);
+        return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+      }
+    } else {
+      return res.status(401).send({ status: 401, message: 'failure', reason: "UnAuthorised access" });
+
+    }
   }
 }
+ 
