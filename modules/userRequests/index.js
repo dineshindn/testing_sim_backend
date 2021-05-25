@@ -35,6 +35,50 @@ const getReport = async (rowData, next) => {
   }
 }
 
+const saveRequest = async (element) => {
+  try {
+    const requestNumber = randomize('A0', 8);
+    const result = await executeQuery(
+      "INSERT INTO userRequests (requestNumber, fk_simId, fk_requestedState, comments, fk_assignedTo, fk_createdBy, status, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        requestNumber,
+        element.fk_simId,
+        element.fk_requestedState,
+        element.comments,
+        element.fk_assignedTo,
+        element.fk_createdBy,
+        'Pending',
+        element.resolution,
+        element.closedDate,
+        new Date(),
+        new Date(),
+        new Date()
+      ]
+    );
+        
+    // creating notifications
+    await executeQuery(
+      "INSERT INTO notifications (fk_createdBy, fk_userRequestsId, fk_resolvedBy, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?)",
+      [
+        element.fk_createdBy,
+        result.insertId,
+        null,
+        new Date(),
+        new Date()
+      ]
+    );
+    //updating isRequested filed in the simDetials
+    await executeQuery(
+      "UPDATE simDetails SET isRequested=? WHERE id=?;",
+      [
+        1,
+        element.fk_simId
+      ]
+    );
+  } catch (_err) {
+    console.log(":::Generate excel error:::::=>", _err)
+  }
+}
 
 module.exports = {
 
@@ -80,6 +124,32 @@ module.exports = {
         ]
       );
       return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, requestNumber: request.requestNumber } });
+    } catch (err) {
+      return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
+    }
+  },
+
+  async createMultipleUserRequest(req, res) {
+    try {
+      let data = req.body ? req.body : [];
+      if (data && data.length) {
+        let series = [];
+        data.forEach((element) => {
+          series.push(async (next) => {
+            await saveRequest(element);
+          });
+        })
+        async.series(series, async function (err) {
+          try {
+            if (err) {
+              return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: err.message } });
+            }
+            return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully' });
+          } catch (error) {
+            return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong", result: { error: error.message } });
+          } 
+        });
+      }
     } catch (err) {
       return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
     }

@@ -60,6 +60,7 @@ module.exports = (app) => {
   app.get("/simmanager/api/v1/getUserRequestById", userRequests.getUserRequestById);
   app.post("/simmanager/api/v1/userRequestStateChange", userRequests.userRequestStateChange);
   app.patch("/simmanager/api/v1/userRequests", userRequests.update);
+  app.post("/simmanager/api/v1/createMultipleUserRequest", userRequests.createMultipleUserRequest);
 
   //requeststatus
   app.get("/simmanager/api/v1/requestState", requestState.list);
