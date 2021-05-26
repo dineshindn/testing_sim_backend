@@ -408,6 +408,9 @@ module.exports = {
           }
         } else {
           const totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
+          if(status && status === 'withoutDevice'){
+            result && result.map(x => delete x.deviceId )
+          }
           const responseJson = {
             'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
             'pageCount': result.length,
