@@ -407,9 +407,22 @@ module.exports = {
             });
           }
         } else {
-          const totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
-          if(status && status === 'withoutDevice'){
-            result && result.map(x => delete x.deviceId )
+          let totalRecords;
+          if (status) {
+            if (status && status != 'ALL' && status != 'withoutDevice' && status != 'withDevice') {
+              const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
+              let _id = statusId && statusId.id ? statusId.id : '';
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE fk_status=?;`, [_id]);
+            } else if (status === 'withoutDevice') {
+              result && result.map(x => delete x.deviceId )
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE deviceId=?`, ['']);
+            } else if (status === 'withDevice') {
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails where ORD(deviceId) > 0;`);
+            } else if (status === 'ALL') {
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
+            }
+          } else {
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
           }
           const responseJson = {
             'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
