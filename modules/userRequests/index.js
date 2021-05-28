@@ -273,7 +273,25 @@ module.exports = {
           });
         }
       } else {
-        const totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
+        let totalRecords;
+        if (status) {
+          if (status && status != 'ALL') {
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE status REGEXP '${status}'`);
+          } else if (status === 'ALL') {
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
+          }
+        } else if (requestedState) {
+          if (requestedState && requestedState != 'ALL') {
+            const state = (await executeQuery(`SELECT id FROM requestStatus WHERE name REGEXP '${requestedState}';`))[0]
+            let _id = state && state.id ? state.id : '';
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE fk_requestedState=?;`, [_id]);
+          } else if (requestedState === 'ALL') {
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
+          }
+        } else {
+          totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
+        }
+
         const responseJson = {
           'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
           'pageCount': result.length,
