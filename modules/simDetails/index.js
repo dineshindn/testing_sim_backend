@@ -321,16 +321,16 @@ module.exports = {
         let query;
         if (simNumber || deviceId || mobileNumber || withDeviceId || withoutDeviceId || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || status || deviceIdSort || dispatchDateSort || from || to) {
           if (simNumber) {
-            query = `SELECT * FROM simDetails WHERE simNumber REGEXP ${simNumber} limit ${limit} offset ${offset};`;
+            query = `SELECT * FROM simDetails WHERE simNumber REGEXP '${simNumber}' limit ${limit} offset ${offset};`;
             value = simNumber;
           } else if (deviceId || deviceIdSort) {
             query = deviceIdSort ? `SELECT * FROM simDetails ORDER BY deviceId ${deviceIdSort};` : `SELECT * FROM simDetails WHERE deviceId REGEXP '${deviceId}' limit ${limit} offset ${offset};`;
             value = deviceId;            
           } else if (mobileNumber) {
-            query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP ${mobileNumber} limit ${limit} offset ${offset};`;
+            query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP '${mobileNumber}' limit ${limit} offset ${offset};`;
             value = mobileNumber;
           } else if (networkProviderId) {
-            query = `SELECT * FROM simDetails WHERE networkProviderId REGEXP ${networkProviderId} limit ${limit} offset ${offset};`;
+            query = `SELECT * FROM simDetails WHERE networkProviderId REGEXP '${networkProviderId}' limit ${limit} offset ${offset};`;
             value = networkProviderId;
           } else if (networkProvider) {
             const networkId = (await executeQuery(`SELECT id FROM networkProvider WHERE name REGEXP '${networkProvider}';`))[0]
@@ -343,7 +343,7 @@ module.exports = {
             query = `SELECT * FROM simDetails WHERE fk_oem=? limit ${limit} offset ${offset};`;
             value = _id;
           } else if (imeiNumber) {
-            query = `SELECT * FROM simDetails WHERE imeiNumber REGEXP ${imeiNumber} limit ${limit} offset ${offset};`;
+            query = `SELECT * FROM simDetails WHERE imeiNumber REGEXP '${imeiNumber}' limit ${limit} offset ${offset};`;
             value = imeiNumber;
           }
           // else if (status) {

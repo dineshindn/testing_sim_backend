@@ -291,7 +291,7 @@ module.exports = {
         } else {
           totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
         }
-
+        await result.sort((a, b) => b.insertUTC - a.insertUTC)
         const responseJson = {
           'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
           'pageCount': result.length,
