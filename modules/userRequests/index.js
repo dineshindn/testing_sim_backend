@@ -37,44 +37,49 @@ const getReport = async (rowData, next) => {
 
 const saveRequest = async (element) => {
   try {
-    const requestNumber = randomize('A0', 8);
-    const result = await executeQuery(
-      "INSERT INTO userRequests (requestNumber, fk_simId, fk_requestedState, comments, fk_assignedTo, fk_createdBy, status, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        requestNumber,
-        element.fk_simId,
-        element.fk_requestedState,
-        element.comments,
-        element.fk_assignedTo,
-        element.fk_createdBy,
-        'Pending',
-        element.resolution,
-        element.closedDate,
-        new Date(),
-        new Date(),
-        new Date()
-      ]
-    );
-        
-    // creating notifications
-    await executeQuery(
-      "INSERT INTO notifications (fk_createdBy, fk_userRequestsId, fk_resolvedBy, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?)",
-      [
-        element.fk_createdBy,
-        result.insertId,
-        null,
-        new Date(),
-        new Date()
-      ]
-    );
-    //updating isRequested filed in the simDetials
-    await executeQuery(
-      "UPDATE simDetails SET isRequested=? WHERE id=?;",
-      [
-        1,
-        element.fk_simId
-      ]
-    );
+    if (element.fk_simId) {
+      const simDeviceId = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [element.fk_simId]))[0];
+      if (simDeviceId && simDeviceId.deviceId && simDeviceId.deviceId.length) {
+        const requestNumber = randomize('A0', 8);
+        const result = await executeQuery(
+          "INSERT INTO userRequests (requestNumber, fk_simId, fk_requestedState, comments, fk_assignedTo, fk_createdBy, status, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          [
+            requestNumber,
+            element.fk_simId,
+            element.fk_requestedState,
+            element.comments,
+            element.fk_assignedTo,
+            element.fk_createdBy,
+            'Pending',
+            element.resolution,
+            element.closedDate,
+            new Date(),
+            new Date(),
+            new Date()
+          ]
+        );
+
+        // creating notifications
+        await executeQuery(
+          "INSERT INTO notifications (fk_createdBy, fk_userRequestsId, fk_resolvedBy, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?)",
+          [
+            element.fk_createdBy,
+            result.insertId,
+            null,
+            new Date(),
+            new Date()
+          ]
+        );
+        //updating isRequested filed in the simDetials
+        await executeQuery(
+          "UPDATE simDetails SET isRequested=? WHERE id=?;",
+          [
+            1,
+            element.fk_simId
+          ]
+        );
+      }
+    }
   } catch (_err) {
     console.log(":::Generate excel error:::::=>", _err)
   }
@@ -84,46 +89,53 @@ module.exports = {
 
   async create(req, res) {
     try {
-      const requestNumber = randomize('A0', 8);
-      const result = await executeQuery(
-        "INSERT INTO userRequests (requestNumber, fk_simId, fk_requestedState, comments, fk_assignedTo, fk_createdBy, status, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          requestNumber,
-          req.body.fk_simId,
-          req.body.fk_requestedState,
-          req.body.comments,
-          req.body.fk_assignedTo,
-          req.body.fk_createdBy,
-          'Pending',
-          req.body.resolution,
-          req.body.closedDate,
-          new Date(),
-          new Date(),
-          new Date()
-        ]
-      );
-      const request = (await executeQuery("SELECT requestNumber from userRequests WHERE id=?", [result.insertId]))[0];
-      
-      // creating notifications
-      await executeQuery(
-        "INSERT INTO notifications (fk_createdBy, fk_userRequestsId, fk_resolvedBy, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?)",
-        [
-          req.body.fk_createdBy,
-          result.insertId,
-          null,
-          new Date(),
-          new Date()
-        ]
-      );
-      //updating isRequested filed in the simDetials
-      await executeQuery(
-        "UPDATE simDetails SET isRequested=? WHERE id=?;",
-        [
-          1,
-          req.body.fk_simId
-        ]
-      );
-      return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, requestNumber: request.requestNumber } });
+      if (req.body && req.body.fk_simId) {
+        const simDeviceId = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [req.body.fk_simId]))[0];
+        if (simDeviceId && simDeviceId.deviceId && simDeviceId.deviceId.length) {
+          const requestNumber = randomize('A0', 8);
+          const result = await executeQuery(
+            "INSERT INTO userRequests (requestNumber, fk_simId, fk_requestedState, comments, fk_assignedTo, fk_createdBy, status, resolution, closedDate, raisedDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+              requestNumber,
+              req.body.fk_simId,
+              req.body.fk_requestedState,
+              req.body.comments,
+              req.body.fk_assignedTo,
+              req.body.fk_createdBy,
+              'Pending',
+              req.body.resolution,
+              req.body.closedDate,
+              new Date(),
+              new Date(),
+              new Date()
+            ]
+          );
+          const request = (await executeQuery("SELECT requestNumber from userRequests WHERE id=?", [result.insertId]))[0];
+
+          // creating notifications
+          await executeQuery(
+            "INSERT INTO notifications (fk_createdBy, fk_userRequestsId, fk_resolvedBy, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?)",
+            [
+              req.body.fk_createdBy,
+              result.insertId,
+              null,
+              new Date(),
+              new Date()
+            ]
+          );
+          //updating isRequested filed in the simDetials
+          await executeQuery(
+            "UPDATE simDetails SET isRequested=? WHERE id=?;",
+            [
+              1,
+              req.body.fk_simId
+            ]
+          );
+          return res.status(200).send({ status: 200, message: 'success', reason: 'Created Successfully', result: { id: result.insertId, requestNumber: request.requestNumber } });
+        } else {
+          return res.status(400).send({ status: 400, message: 'failure', reason: 'Invalid device id' });
+        }
+      }
     } catch (err) {
       return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
     }
