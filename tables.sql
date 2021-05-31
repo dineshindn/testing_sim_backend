@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `simDetails` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `deviceId` varchar(15) NULL,
-  `simNumber` int(15) NOT NULL,
+  `simNumber` int(20) NOT NULL,
   `deviceSerialNumber` varchar(20) NOT NULL,
   `imeiNumber` varchar(20) NOT NULL,
   `fk_networkProviderId` bigint(20) NULL,
