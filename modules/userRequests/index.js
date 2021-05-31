@@ -37,7 +37,7 @@ const getReport = async (rowData, next) => {
 
 const saveRequest = async (element) => {
   try {
-    if (element.fk_simId) {
+    if (element.fk_simId && element.fk_requestedState) {
       const simDeviceId = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [element.fk_simId]))[0];
       if (simDeviceId && simDeviceId.deviceId && simDeviceId.deviceId.length) {
         const requestNumber = randomize('A0', 8);
@@ -89,7 +89,7 @@ module.exports = {
 
   async create(req, res) {
     try {
-      if (req.body && req.body.fk_simId) {
+      if (req.body && req.body.fk_simId && req.body.fk_requestedState) {
         const simDeviceId = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [req.body.fk_simId]))[0];
         if (simDeviceId && simDeviceId.deviceId && simDeviceId.deviceId.length) {
           const requestNumber = randomize('A0', 8);
@@ -135,6 +135,9 @@ module.exports = {
         } else {
           return res.status(400).send({ status: 400, message: 'failure', reason: 'Invalid device id' });
         }
+      } else {
+        return res.status(400).send({ status: 400, message: 'failure', reason: 'Invalid data' });
+
       }
     } catch (err) {
       return res.status(400).send({ status: 400, message: 'failure', reason: 'something went wrong', result: { error: err.message } });
