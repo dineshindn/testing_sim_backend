@@ -215,24 +215,25 @@ module.exports = {
       let query;
       if (requestNumber || requestedState || requestedStateSort || comments || commentsSort || resolution || resolutionSort || raisedDate || raisedDateSort || closedDate || closedDateSort || status || statusSort || assignedTo || createdBy) {
         if (requestNumber) {
-          query = `SELECT * FROM userRequests WHERE requestNumber REGEXP '${requestNumber}' limit ${limit} offset ${offset};`;
+          query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE requestNumber REGEXP '${requestNumber}' limit ${limit} offset ${offset};`;
           value = requestNumber;
         } else if (comments || commentsSort) {
-          query = commentsSort ? `SELECT * FROM userRequests ORDER BY comments ${commentsSort} limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE comments REGEXP '${comments}' limit ${limit} offset ${offset};`;
+          console.log("=====comments======",comments, commentsSort)
+          query = commentsSort ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id ORDER BY comments ${commentsSort} limit ${limit} offset ${offset};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE comments REGEXP '${comments}' limit ${limit} offset ${offset};`;
           value = comments;
         } else if (status) {
-          query = status == 'ALL' ? `SELECT * FROM userRequests limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE status REGEXP '${status}' limit ${limit} offset ${offset}`;
+          query = status == 'ALL' ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  limit ${limit} offset ${offset};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  WHERE status REGEXP '${status}' limit ${limit} offset ${offset}`;
           value = status;
         } else if (statusSort) {
-          query = `SELECT * FROM userRequests ORDER BY status ${statusSort} limit ${limit} offset ${offset};`
+          query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id ORDER BY status ${statusSort} limit ${limit} offset ${offset};`
           value = statusSort;
         } else if (requestedState) {
           if (requestedState === 'ALL') {
-            query = `SELECT * FROM userRequests limit ${limit} offset ${offset};`
+            query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id limit ${limit} offset ${offset};`
           } else {
             const reqStateId = (await executeQuery(`SELECT id FROM requestStatus WHERE name REGEXP '${requestedState}';`))[0]
             let _id = reqStateId && reqStateId.id ? reqStateId.id : ''
-            query = `SELECT * FROM userRequests WHERE fk_requestedState=? limit ${limit} offset ${offset};`;
+            query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE fk_requestedState=? limit ${limit} offset ${offset};`;
             value = _id;
           }
         }
@@ -242,27 +243,27 @@ module.exports = {
         //   value = reqStateId.id;
         // } 
         else if (raisedDate || raisedDateSort) {
-          query = raisedDateSort ? `SELECT * FROM userRequests ORDER BY raisedDate ${raisedDateSort};` : `SELECT * FROM userRequests WHERE raisedDate=?`;
+          query = raisedDateSort ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  ORDER BY raisedDate ${raisedDateSort};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE raisedDate=?`;
           value = raisedDate;
         } else if (closedDate || closedDateSort) {
-          query = closedDateSort ? `SELECT * FROM userRequests ORDER BY closedDate ${closedDateSort};` : `SELECT * FROM userRequests WHERE closedDate=?`;
+          query = closedDateSort ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id ORDER BY closedDate ${closedDateSort};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE closedDate=?`;
           value = closedDate;
         } else if (resolution || resolutionSort) {
-          query = resolutionSort ? `SELECT * FROM userRequests ORDER BY resolution ${resolutionSort} limit ${limit} offset ${offset};` : `SELECT * FROM userRequests WHERE resolution REGEXP '${resolution}' limit ${limit} offset ${offset};`;
+          query = resolutionSort ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id ORDER BY resolution ${resolutionSort} limit ${limit} offset ${offset};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE resolution REGEXP '${resolution}' limit ${limit} offset ${offset};`;
           value = resolution;
         } else if (assignedTo) {
           const assignedId = (await executeQuery(`SELECT id FROM users WHERE userName REGEXP '${assignedTo}';`))[0]
           let _id = assignedId && assignedId.id ? assignedId.id : ''
-          query = `SELECT * FROM userRequests WHERE fk_assignedTo=? limit ${limit} offset ${offset};`;
+          query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE fk_assignedTo=? limit ${limit} offset ${offset};`;
           value = _id;
         } else if (createdBy) {
           const createdById = (await executeQuery(`SELECT id FROM users WHERE userName REGEXP '${createdBy}';`))[0]
           let _id = createdById && createdById.id ? createdById.id : ''
-          query = `SELECT * FROM userRequests WHERE fk_createdBy=? limit ${limit} offset ${offset};`;
+          query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE fk_createdBy=? limit ${limit} offset ${offset};`;
           value = _id;
         }
       } else {
-        query = `SELECT * FROM userRequests limit ${limit} offset ${offset};`;
+        query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  limit ${limit} offset ${offset};`;
       }
       const result = await executeQuery(query, [value]);
       if (isDownload && isDownload === 'true') {
