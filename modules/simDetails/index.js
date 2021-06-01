@@ -309,7 +309,7 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const { simNumber, withoutDeviceId, withDeviceId, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, status, dispatchDateSort, from, to, isDownload, role } = req && req.query ? req.query : {};
+      const { simNumber, withoutDeviceId, withDeviceId, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, status, dispatchDateSort, from, to, isDownload, role, today } = req && req.query ? req.query : {};
 
       if (role) {
         const limit = req && req.query && req.query.limit ? req.query.limit : 10;
@@ -319,7 +319,7 @@ module.exports = {
         offset = Number.isNaN(offset) ? 0 : offset;
         let value;
         let query;
-        if (simNumber || deviceId || mobileNumber || withDeviceId || withoutDeviceId || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || status || deviceIdSort || dispatchDateSort || from || to) {
+        if (simNumber || deviceId || mobileNumber || withDeviceId || withoutDeviceId || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || status || deviceIdSort || dispatchDateSort || from || to || today) {
           if (simNumber) {
             query = `SELECT * FROM simDetails WHERE simNumber REGEXP '${simNumber}' limit ${limit} offset ${offset};`;
             value = simNumber;
@@ -378,6 +378,8 @@ module.exports = {
             }
             // console.log("====inside the from and to====")
             // query = `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+          } else if(today){
+            query = `SELECT * FROM simDetails WHERE date(insertUTC) = current_date limit ${limit} offset ${offset};`;
           }
         } else {
           query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`;
