@@ -84,9 +84,9 @@ const rolesRestrictions = async (role, result) => {
   return new Promise((resolve, reject) => {
     result.forEach((e) => {
       switch (role) {
-        case 'warehouse':
-          delete e.fk_networkProviderId;
-          break;
+        // case 'warehouse':
+        //   delete e.fk_networkProviderId;
+        //   break;
         case 'fos':
           //deviceId: 'NI00051',
           //delete e.simNumber,
