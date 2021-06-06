@@ -309,8 +309,7 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const { simNumber, withoutDeviceId, withDeviceId, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, status, dispatchDateSort, from, to, isDownload, role, today } = req && req.query ? req.query : {};
-
+      const { simNumber, withoutDeviceId, deviceId, deviceIdSort, mobileNumber, networkProviderId, imeiNumber, networkProvider, oem, stateChangeDate, stateChangeDateSort, dispatchDate, status, dispatchDateSort, from, to, isDownload, role, today } = req && req.query ? req.query : {};
       if (role) {
         const limit = req && req.query && req.query.limit ? req.query.limit : 10;
         const page = req && req.query && req.query.page ? req.query.page : 1;
@@ -319,13 +318,13 @@ module.exports = {
         offset = Number.isNaN(offset) ? 0 : offset;
         let value;
         let query;
-        if (simNumber || deviceId || mobileNumber || withDeviceId || withoutDeviceId || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || status || deviceIdSort || dispatchDateSort || from || to || today) {
+        if (simNumber || deviceId || mobileNumber  || withoutDeviceId || networkProviderId || imeiNumber || networkProvider || oem || stateChangeDate || stateChangeDateSort || dispatchDate || status || deviceIdSort || dispatchDateSort || from || to || today) {
           if (simNumber) {
             query = `SELECT * FROM simDetails WHERE simNumber REGEXP '${simNumber}' limit ${limit} offset ${offset};`;
             value = simNumber;
           } else if (deviceId || deviceIdSort) {
             query = deviceIdSort ? `SELECT * FROM simDetails ORDER BY deviceId ${deviceIdSort};` : `SELECT * FROM simDetails WHERE deviceId REGEXP '${deviceId}' limit ${limit} offset ${offset};`;
-            value = deviceId;            
+            value = deviceId;   
           } else if (mobileNumber) {
             query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP '${mobileNumber}' limit ${limit} offset ${offset};`;
             value = mobileNumber;
@@ -365,16 +364,24 @@ module.exports = {
           } else if (status || from && to) {
             if (status === 'ALL') {
               query = status === 'ALL' && !from && !to ? `SELECT * FROM simDetails limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
-            } else if (status != 'withDevice' && status != 'withoutDevice') {
+            } else if (status && status != 'withDevice' && status != 'withoutDevice' && status != 'ALL') {
               const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
-              let _id = statusId && statusId.id ? statusId.id : ''
+              let _id = statusId && statusId.id ? statusId.id : '';
               query = !from && !to ? `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE fk_status=? AND insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
               value = _id;
+            } else if (status === 'withDevice' && from && to) {
+              query = `SELECT * FROM simDetails where ORD(deviceId) > 0 AND insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+            } else if (status === 'withoutDevice' && from && to) {
+              query = `SELECT * FROM simDetails where deviceId=? AND insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+              value = '';
             } else if (status === 'withoutDevice') {
               query = `SELECT * FROM simDetails WHERE deviceId=? limit ${limit} offset ${offset};`
               value = '';
             } else if (status === 'withDevice') {
               query = `SELECT * FROM simDetails where ORD(deviceId) > 0 limit ${limit} offset ${offset};`
+            } else if (!status && from && to) {
+              query = `SELECT * FROM simDetails where insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+
             }
             // console.log("====inside the from and to====")
             // query = `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
