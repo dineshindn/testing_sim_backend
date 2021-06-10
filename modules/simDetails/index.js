@@ -340,6 +340,7 @@ module.exports = {
         const limit = req && req.query && req.query.limit ? req.query.limit : 10;
         const page = req && req.query && req.query.page ? req.query.page : 1;
         var offset;
+        let totalRecords;
         offset = (page - 1) * limit;
         offset = Number.isNaN(offset) ? 0 : offset;
         let value;
@@ -348,20 +349,26 @@ module.exports = {
           if (simNumber) {
             query = `SELECT * FROM simDetails WHERE simNumber REGEXP '${simNumber}' limit ${limit} offset ${offset};`;
             value = simNumber;
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE simNumber REGEXP '${simNumber}';`);
           } else if (deviceId || deviceIdSort) {
             query = deviceIdSort ? `SELECT * FROM simDetails ORDER BY deviceId ${deviceIdSort};` : `SELECT * FROM simDetails WHERE deviceId REGEXP '${deviceId}' limit ${limit} offset ${offset};`;
             value = deviceId;   
+            totalRecords = deviceIdSort ? await executeQuery(`SELECT COUNT(*) FROM simDetails ORDER BY deviceId ${deviceIdSort};`): await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE deviceId REGEXP '${deviceId}';`)
           } else if (mobileNumber) {
             query = `SELECT * FROM simDetails WHERE mobileNumber REGEXP '${mobileNumber}' limit ${limit} offset ${offset};`;
             value = mobileNumber;
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE mobileNumber REGEXP '${mobileNumber}';`);
+
           } else if (networkProviderId) {
             query = `SELECT * FROM simDetails WHERE networkProviderId REGEXP '${networkProviderId}' limit ${limit} offset ${offset};`;
             value = networkProviderId;
+            //pending totalcount
           } else if (networkProvider) {
             const networkId = (await executeQuery(`SELECT id FROM networkProvider WHERE name REGEXP '${networkProvider}';`))[0]
             let _id = networkId && networkId.id ? networkId.id : ''
             query = `SELECT * FROM simDetails WHERE fk_networkProviderId=? limit ${limit} offset ${offset};`;
             value = _id;
+            //pending totalcount
           } else if (oem) {
             const oemId = (await executeQuery(`SELECT id FROM oem WHERE name REGEXP '${oem}';`))[0]
             let _id = oemId && oemId.id ? oemId.id : ''
@@ -370,54 +377,59 @@ module.exports = {
           } else if (imeiNumber) {
             query = `SELECT * FROM simDetails WHERE imeiNumber REGEXP '${imeiNumber}' limit ${limit} offset ${offset};`;
             value = imeiNumber;
-          }
-          // else if (status) {
-          //   if (status === 'ALL') {
-          //     query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`
-          //   } else {
-          //     const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
-          //     let _id = statusId && statusId.id ? statusId.id : ''
-          //     query = `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset};`;
-          //     value = _id;
-          //   }
-          // }
-          else if (stateChangeDate || stateChangeDateSort) {
-            query = stateChangeDateSort ? `SELECT * FROM simDetails ORDER BY stateChangeDate ${stateChangeDateSort};` : `SELECT * FROM simDetails WHERE stateChangeDate=?`;
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE imeiNumber REGEXP '${imeiNumber}';`);
+          } else if (stateChangeDate || stateChangeDateSort) {
+            query = stateChangeDateSort ? `SELECT * FROM simDetails ORDER BY stateChangeDate ${stateChangeDateSort};` : `SELECT * FROM simDetails WHERE DATE(stateChangeDate)='${stateChangeDate}';`;
             value = stateChangeDate;
+            totalRecords = stateChangeDateSort ? await executeQuery(`SELECT COUNT(*) FROM simDetails ORDER BY stateChangeDate ${stateChangeDateSort};`): await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE DATE(stateChangeDate)='${stateChangeDate}';`)
           } else if (dispatchDate || dispatchDateSort) {
-            query = dispatchDateSort ? `SELECT * FROM simDetails ORDER BY dispatchDate ${dispatchDateSort};` : `SELECT * FROM simDetails WHERE dispatchDate=?`;
+            query = dispatchDateSort ? `SELECT * FROM simDetails ORDER BY dispatchDate ${dispatchDateSort};` : `SELECT * FROM simDetails WHERE DATE(dispatchDate)='${dispatchDate}';`;
             value = dispatchDate;
+            totalRecords = dispatchDateSort ? await executeQuery(`SELECT COUNT(*) FROM simDetails ORDER BY dispatchDate ${dispatchDateSort};`): await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE DATE(dispatchDate)='${dispatchDate}';`);
+
+            //status sort and date range search & sort
           } else if (status || from && to) {
             if (status === 'ALL') {
               query = status === 'ALL' && !from && !to ? `SELECT * FROM simDetails limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+              totalRecords = status === 'ALL' && !from && !to ? await executeQuery(`SELECT COUNT(*) FROM simDetails;`): await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}';`);
+
             } else if (status && status != 'withDevice' && status != 'withoutDevice' && status != 'ALL') {
               const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
               let _id = statusId && statusId.id ? statusId.id : '';
               query = !from && !to ? `SELECT * FROM simDetails WHERE fk_status=? limit ${limit} offset ${offset};` : `SELECT * FROM simDetails WHERE fk_status=? AND insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
               value = _id;
+              totalRecords = !from && !to ? await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE fk_status=?;`,[_id]): await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE fk_status=? AND insertUTC >= '${from}' AND insertUTC <= '${to};`);
+
             } else if (status === 'withDevice' && from && to) {
               query = `SELECT * FROM simDetails where ORD(deviceId) > 0 AND insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails where ORD(deviceId) > 0 AND insertUTC >= '${from}' AND insertUTC <= '${to}';`);
             } else if (status === 'withoutDevice' && from && to) {
               query = `SELECT * FROM simDetails where deviceId=? AND insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
               value = '';
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails where deviceId=? AND insertUTC >= '${from}' AND insertUTC <= '${to}'`,['']);
             } else if (status === 'withoutDevice') {
               query = `SELECT * FROM simDetails WHERE deviceId=? limit ${limit} offset ${offset};`
               value = '';
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE deviceId=?`,['']);
             } else if (status === 'withDevice') {
               query = `SELECT * FROM simDetails where ORD(deviceId) > 0 limit ${limit} offset ${offset};`
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails where ORD(deviceId) > 0;`);
+
             } else if (!status && from && to) {
               query = `SELECT * FROM simDetails where insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
-
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails where insertUTC >= '${from}' AND insertUTC <= '${to}';`);
             }
-            // console.log("====inside the from and to====")
-            // query = `SELECT * FROM simDetails WHERE insertUTC >= '${from}' AND insertUTC <= '${to}' limit ${limit} offset ${offset};`
-          } else if(today){
-            query = `SELECT * FROM simDetails WHERE date(insertUTC) = current_date limit ${limit} offset ${offset};`;
+          } else if (today && today === 'true') {
+            query = `SELECT * FROM simDetails where insertUTC >=  CURDATE() limit ${limit} offset ${offset};`
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE insertUTC >=  CURDATE();`);
           }
         } else {
           query = `SELECT * FROM simDetails limit ${limit} offset ${offset};`;
+          totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
+
         }
-        const result = await executeQuery(query, [value]);
+        if(!query) return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid query" });
+        const result = await executeQuery(query, [value]);   
         if (isDownload && isDownload === 'true') {
           if (result && result.length) {
             let series = [];
@@ -442,23 +454,6 @@ module.exports = {
             });
           }
         } else {
-          let totalRecords;
-          if (status) {
-            if (status && status != 'ALL' && status != 'withoutDevice' && status != 'withDevice') {
-              const statusId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${status}';`))[0]
-              let _id = statusId && statusId.id ? statusId.id : '';
-              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE fk_status=?;`, [_id]);
-            } else if (status === 'withoutDevice') {
-              result && result.map(x => delete x.deviceId )
-              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE deviceId=?`, ['']);
-            } else if (status === 'withDevice') {
-              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails where ORD(deviceId) > 0;`);
-            } else if (status === 'ALL') {
-              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
-            }
-          } else {
-            totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
-          }
           const responseJson = {
             'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
             'pageCount': result.length,
