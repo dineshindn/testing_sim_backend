@@ -440,6 +440,7 @@ module.exports = {
             })
             async.series(series, async function (err) {
               try {
+                
                 if (err) {
                   return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong while downloading the data", result: { error: err.message } });
                 }
