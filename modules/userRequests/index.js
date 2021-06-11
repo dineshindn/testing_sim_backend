@@ -202,39 +202,51 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const { requestNumber, comments, requestedState, requestedStateSort, commentsSort, resolution, resolutionSort, raisedDate, raisedDateSort, closedDate, closedDateSort, status, statusSort, assignedTo, createdBy, isDownload } = req && req.query ? req.query : {};
+      const { requestNumber, comments, requestedState, requestedStateSort, commentsSort, resolution, resolutionSort, raisedDate, raisedDateSort, closedDate, closedDateSort, status, statusSort, assignedTo, createdBy, isDownload, today } = req && req.query ? req.query : {};
 
       const limit = req && req.query && req.query.limit ? req.query.limit : 10;
       const page = req && req.query && req.query.page ? req.query.page : 1;
       const sort = req && req.query && req.query.page ? req.query.sort : '';
-
+      let totalRecords;
       var offset;
       offset = (page - 1) * limit;
       offset = Number.isNaN(offset) ? 0 : offset;
       let value;
       let query;
-      if (requestNumber || requestedState || requestedStateSort || comments || commentsSort || resolution || resolutionSort || raisedDate || raisedDateSort || closedDate || closedDateSort || status || statusSort || assignedTo || createdBy) {
+      if (requestNumber || requestedState || requestedStateSort || comments || commentsSort || resolution || resolutionSort || raisedDate || raisedDateSort || closedDate || closedDateSort || status || statusSort || assignedTo || createdBy || today) {
         if (requestNumber) {
           query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE requestNumber REGEXP '${requestNumber}' limit ${limit} offset ${offset};`;
           value = requestNumber;
+          totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE requestNumber REGEXP '${requestNumber}';`);
+
         } else if (comments || commentsSort) {
           console.log("=====comments======",comments, commentsSort)
           query = commentsSort ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id ORDER BY comments ${commentsSort} limit ${limit} offset ${offset};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE comments REGEXP '${comments}' limit ${limit} offset ${offset};`;
           value = comments;
+          totalRecords = commentsSort ? await executeQuery(`SELECT COUNT(*) FROM userRequests ORDER BY comments ${commentsSort};`) : await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE comments REGEXP '${comments}';`);
+
         } else if (status) {
           query = status == 'ALL' ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  limit ${limit} offset ${offset};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  WHERE status REGEXP '${status}' limit ${limit} offset ${offset}`;
           value = status;
+          totalRecords = status == 'ALL' ? await executeQuery(`SELECT COUNT(*) FROM userRequests;`) : await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE status REGEXP '${status}';`);
+
         } else if (statusSort) {
           query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id ORDER BY status ${statusSort} limit ${limit} offset ${offset};`
           value = statusSort;
+          totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests ORDER BY status ${statusSort};`);
+
         } else if (requestedState) {
           if (requestedState === 'ALL') {
             query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id limit ${limit} offset ${offset};`
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
+
           } else {
             const reqStateId = (await executeQuery(`SELECT id FROM requestStatus WHERE name REGEXP '${requestedState}';`))[0]
             let _id = reqStateId && reqStateId.id ? reqStateId.id : ''
             query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE fk_requestedState=? limit ${limit} offset ${offset};`;
             value = _id;
+            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE fk_requestedState=?;`,[_id]);
+
           }
         }
         // else if (requestedStateSort) {
@@ -245,26 +257,41 @@ module.exports = {
         else if (raisedDate || raisedDateSort) {
           query = raisedDateSort ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  ORDER BY raisedDate ${raisedDateSort};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE raisedDate=?`;
           value = raisedDate;
+          totalRecords = raisedDateSort ? await executeQuery(`SELECT COUNT(*) FROM userRequests ORDER BY raisedDate ${raisedDateSort};`) : await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE raisedDate=?;`,[raisedDate]);
+
         } else if (closedDate || closedDateSort) {
           query = closedDateSort ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id ORDER BY closedDate ${closedDateSort};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE closedDate=?`;
           value = closedDate;
+          totalRecords = closedDateSort ? await executeQuery(`SELECT COUNT(*) FROM userRequests ORDER BY closedDate ${closedDateSort};`) : await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE closedDate=?;`,[closedDate]);
+
         } else if (resolution || resolutionSort) {
           query = resolutionSort ? `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id ORDER BY resolution ${resolutionSort} limit ${limit} offset ${offset};` : `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE resolution REGEXP '${resolution}' limit ${limit} offset ${offset};`;
           value = resolution;
+          totalRecords = resolutionSort ? await executeQuery(`SELECT COUNT(*) FROM userRequests ORDER BY resolution ${resolutionSort};`) : await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE resolution REGEXP '${resolution}';`);
+
         } else if (assignedTo) {
           const assignedId = (await executeQuery(`SELECT id FROM users WHERE userName REGEXP '${assignedTo}';`))[0]
           let _id = assignedId && assignedId.id ? assignedId.id : ''
           query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE fk_assignedTo=? limit ${limit} offset ${offset};`;
           value = _id;
+          totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE fk_assignedTo=?;`,[_id]);
+
         } else if (createdBy) {
           const createdById = (await executeQuery(`SELECT id FROM users WHERE userName REGEXP '${createdBy}';`))[0]
           let _id = createdById && createdById.id ? createdById.id : ''
           query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE fk_createdBy=? limit ${limit} offset ${offset};`;
           value = _id;
+          totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE fk_createdBy=?;`,[_id]);
+
+        } else if(today && today === 'true'){
+          query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  WHERE userRequests.insertUTC >=  CURDATE() limit ${limit} offset ${offset};`
+          totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE insertUTC >=  CURDATE();`);
         }
       } else {
         query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id  limit ${limit} offset ${offset};`;
+        totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
       }
+      if(!query) return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid query" });
       const result = await executeQuery(query, [value]);
       if (isDownload && isDownload === 'true') {
         if (result && result.length) {
@@ -289,24 +316,6 @@ module.exports = {
           });
         }
       } else {
-        let totalRecords;
-        if (status) {
-          if (status && status != 'ALL') {
-            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE status REGEXP '${status}'`);
-          } else if (status === 'ALL') {
-            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
-          }
-        } else if (requestedState) {
-          if (requestedState && requestedState != 'ALL') {
-            const state = (await executeQuery(`SELECT id FROM requestStatus WHERE name REGEXP '${requestedState}';`))[0]
-            let _id = state && state.id ? state.id : '';
-            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests WHERE fk_requestedState=?;`, [_id]);
-          } else if (requestedState === 'ALL') {
-            totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
-          }
-        } else {
-          totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
-        }
         await result.sort((a, b) => b.insertUTC - a.insertUTC)
         const responseJson = {
           'totalCount': parseInt(Object.values(totalRecords[0]).join(",")),
