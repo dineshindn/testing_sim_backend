@@ -364,17 +364,31 @@ module.exports = {
             value = networkProviderId;
             //pending totalcount
           } else if (networkProvider) {
-            const networkId = (await executeQuery(`SELECT id FROM networkProvider WHERE name REGEXP '${networkProvider}';`))[0]
-            let _id = networkId && networkId.id ? networkId.id : ''
-            query = `SELECT * FROM simDetails WHERE fk_networkProviderId=? limit ${limit} offset ${offset};`;
-            value = _id;
-            //pending totalcount
-          } else if (oem) {
-            const oemId = (await executeQuery(`SELECT id FROM oem WHERE name REGEXP '${oem}';`))[0]
-            let _id = oemId && oemId.id ? oemId.id : ''
-            query = `SELECT * FROM simDetails WHERE fk_oem=? limit ${limit} offset ${offset};`;
-            value = _id;
-          } else if (imeiNumber) {
+            if (networkProvider === 'ALL') {
+              query = `SELECT * from simDetails limit ${limit} offset ${offset};`
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
+
+            } else {
+              const providerId = (await executeQuery(`SELECT id FROM networkProvider WHERE name REGEXP '${networkProvider}';`))[0]
+              let _id = providerId && providerId.id ? providerId.id : ''
+              query = `SELECT * from simDetails WHERE fk_networkProviderId=? limit ${limit} offset ${offset};`;
+              value = _id;
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE fk_networkProviderId=?;`,[_id]);
+            }
+          }  else if (oem) {
+            if (oem === 'ALL') {
+              query = `SELECT * from simDetails limit ${limit} offset ${offset};`
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails;`);
+
+            } else {
+              const oemId = (await executeQuery(`SELECT id FROM oem WHERE name REGEXP '${oem}';`))[0]
+              let _id = oemId && oemId.id ? oemId.id : ''
+              query = `SELECT * from simDetails WHERE fk_oem=? limit ${limit} offset ${offset};`;
+              value = _id;
+              totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE fk_oem=?;`,[_id]);
+            }
+          }
+          else if (imeiNumber) {
             query = `SELECT * FROM simDetails WHERE imeiNumber REGEXP '${imeiNumber}' limit ${limit} offset ${offset};`;
             value = imeiNumber;
             totalRecords = await executeQuery(`SELECT COUNT(*) FROM simDetails WHERE imeiNumber REGEXP '${imeiNumber}';`);
@@ -440,7 +454,7 @@ module.exports = {
             })
             async.series(series, async function (err) {
               try {
-                
+
                 if (err) {
                   return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong while downloading the data", result: { error: err.message } });
                 }
