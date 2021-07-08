@@ -10,7 +10,7 @@ const {
 let finalData = [];
 const getReport = async (rowData, next) => {
   try {
-    const reqState = await executeQuery(`SELECT name FROM requestStatus WHERE id=?;`, [rowData.fk_requestedState]);
+    const reqState = await executeQuery(`SELECT name FROM status WHERE id=?;`, [rowData.fk_requestedState]);
     const assignedName = await executeQuery(`SELECT userName FROM users WHERE id=?;`, [rowData.fk_assignedTo]);
     const createdName = await executeQuery(`SELECT userName FROM users WHERE id=?;`, [rowData.fk_createdBy]);
     const sim = await executeQuery(`SELECT simNumber FROM simDetails WHERE id=?;`, [rowData.fk_simId]);
@@ -241,7 +241,7 @@ module.exports = {
             totalRecords = await executeQuery(`SELECT COUNT(*) FROM userRequests;`);
 
           } else {
-            const reqStateId = (await executeQuery(`SELECT id FROM requestStatus WHERE name REGEXP '${requestedState}';`))[0]
+            const reqStateId = (await executeQuery(`SELECT id FROM status WHERE name REGEXP '${requestedState}';`))[0]
             let _id = reqStateId && reqStateId.id ? reqStateId.id : ''
             query = `SELECT userRequests.*, simDetails.simNumber FROM userRequests LEFT JOIN simDetails ON userRequests.fk_simId = simDetails.id WHERE fk_requestedState=? limit ${limit} offset ${offset};`;
             value = _id;
