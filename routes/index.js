@@ -22,6 +22,7 @@ module.exports = (app) => {
   app.get("/simmanager/api/v1/users", users.list);
   app.post("/simmanager/api/v1/users", users.create);
   app.delete("/simmanager/api/v1/users", users.delete);
+  app.patch("/simmanager/api/v1/users", users.update);
 
   //simDetails
   app.get("/simmanager/api/v1/simDetails", simDetails.list);
@@ -37,7 +38,7 @@ module.exports = (app) => {
 
   //networkProvider
   app.get("/simmanager/api/v1/networkProvider", networkProvider.list);
-  //app.patch("/simmanager/api/v1/networkProvider", networkProvider.update);
+  app.patch("/simmanager/api/v1/networkProvider", networkProvider.update);
 
   //status
   //app.post("/simmanager/api/v1/status", users.create);
