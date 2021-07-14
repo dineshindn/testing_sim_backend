@@ -33,10 +33,12 @@ Clone the project and then make sure to do the following steps to start the back
 ## Example insert query
 1. `INSERT INTO networkProvider (id, name) VALUES ('1', 'Airtel');`
 2. `INSERT INTO networkProvider (id, name) VALUES ('2', 'Jio');`
-4. `INSERT INTO status (id, name, description) VALUES ('1', 'Active', 'active');`
-5. `INSERT INTO status (id, name, description) VALUES ('2', 'Suspended', 'suspended');`
-6. `INSERT INTO status (id, name, description) VALUES ('3', 'Deactivated', 'deactivated');`
-7. `INSERT INTO oem (id, name, description) VALUES ('1', 'Ashok Leyland', 'client company');`
-8. `INSERT INTO oem (id, name, description) VALUES ('2', 'Hitachi', 'client company');`
+3. `INSERT INTO networkProvider (id, name) VALUES ('3', 'TATA');`
+4. `INSERT INTO networkProvider (id, name) VALUES ('4', 'Vodafone');`
+5. `INSERT INTO status (id, name, description) VALUES ('1', 'Active', 'active');`
+6. `INSERT INTO status (id, name, description) VALUES ('2', 'Suspended', 'suspended');`
+7. `INSERT INTO status (id, name, description) VALUES ('3', 'Deactivated', 'deactivated');`
+8. `INSERT INTO oem (id, name, description) VALUES ('1', 'Ashok Leyland', 'client company');`
+9. `INSERT INTO oem (id, name, description) VALUES ('2', 'Hitachi', 'client company');`
 
 ### Happy Coding !
