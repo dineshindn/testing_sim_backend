@@ -22,13 +22,13 @@ module.exports = (app) => {
   app.get("/simmanager/api/v1/users", users.list);
   app.post("/simmanager/api/v1/users", users.create);
   app.delete("/simmanager/api/v1/users", users.delete);
-  app.patch("/simmanager/api/v1/users", users.update);
+  app.put("/simmanager/api/v1/users", users.update);
 
   //simDetails
   app.get("/simmanager/api/v1/simDetails", simDetails.list);
   app.post("/simmanager/api/v1/simDetails", simDetails.create);
   app.delete("/simmanager/api/v1/simDetails", simDetails.delete);
-  app.patch("/simmanager/api/v1/simDetails", simDetails.update);
+  app.put("/simmanager/api/v1/simDetails", simDetails.update);
   app.get("/simmanager/api/v1/getSimDetailsById", simDetails.getSimDetailsById);
   app.post("/simmanager/api/v1/simStateChange", simDetails.simStateChange);
   app.post("/simmanager/api/v1/multipleSimStateChange", simDetails.multipleSimStateChange);
@@ -38,7 +38,7 @@ module.exports = (app) => {
 
   //networkProvider
   app.get("/simmanager/api/v1/networkProvider", networkProvider.list);
-  app.patch("/simmanager/api/v1/networkProvider", networkProvider.update);
+  app.put("/simmanager/api/v1/networkProvider", networkProvider.update);
 
   //status
   //app.post("/simmanager/api/v1/status", users.create);
@@ -60,7 +60,7 @@ module.exports = (app) => {
   app.delete("/simmanager/api/v1/userRequests", userRequests.delete);
   app.get("/simmanager/api/v1/getUserRequestById", userRequests.getUserRequestById);
   app.post("/simmanager/api/v1/userRequestStateChange", userRequests.userRequestStateChange);
-  app.patch("/simmanager/api/v1/userRequests", userRequests.update);
+  app.put("/simmanager/api/v1/userRequests", userRequests.update);
   app.post("/simmanager/api/v1/createMultipleUserRequests", userRequests.createMultipleUserRequest);
 
   //requeststatus
