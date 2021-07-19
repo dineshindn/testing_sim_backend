@@ -2,6 +2,10 @@ const executeQuery = require("../../database");
 var async = require('async');
 var _ = require('lodash');
 var randomize = require('randomatic');
+const fetch = require('node-fetch');
+const STATE_CHANGE_API = process.env.STATE_CHANGE_API;
+const authTokenUrl = process.env.AUTH_TOKEN_URL;
+const basicToken = process.env.BASIC_TOKEN;
 
 const {
   formSetClause
@@ -359,42 +363,96 @@ module.exports = {
       if (requestNumber && state && resolution && approvedOrRejectedBy) {
         let approveStatus = req.body && req.body.isApprove === true ? 'Approved' : req.body.isApprove === false ? 'Rejected' : 'Pending';
         const recordExists = (await executeQuery("SELECT * from userRequests WHERE requestNumber=?", [requestNumber]))[0];
-
         if (!recordExists) {
           return res.status(400).send({ status: 400, message: 'failure', reason: "Status Id error" });
         }
-        await executeQuery(
-          "UPDATE userRequests SET fk_assignedTo=?, fk_requestedState=?, resolution=?, status=?, updateUTC=?, closedDate=? WHERE requestNumber=?;",
-          [
-            approvedOrRejectedBy,
-            state,
-            resolution,
-            approveStatus,
-            new Date(),
-            new Date(),
-            requestNumber
-          ]
-        );
-
-        //updating resolvedBy name to the notifications
-        await executeQuery(
-          "UPDATE notifications SET fk_resolvedBy=?, updateUTC=? WHERE fk_userRequestsId=?;",
-          [
-            approvedOrRejectedBy,
-            new Date(),
-            recordExists.id
-          ]
-        );
-        const simId = await executeQuery(`SELECT fk_simId FROM userRequests where requestNumber=?;`,[requestNumber]);
-        //updating isRequested field in the simDetials after resolving the userRequests
-        await executeQuery(
-          "UPDATE simDetails SET isRequested=? WHERE id=?;",
-          [
-            0,
-            simId[0].fk_simId
-          ]
-        );
-        return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
+        if(state==1 || state==2){
+          if(state==1){
+            var stateVal = 'A';
+          }else if(state==2){
+            var stateVal = 'S';
+          }else{
+            var stateVal = 'D';
+          }
+          const stateExists = (await executeQuery("SELECT * from status WHERE id=?", [state]))[0];
+            if (!stateExists) {
+              return res.status(400).send({ status: 400, message: 'failure', reason: "Status Id error" });
+            }
+          const reqnoExists = (await executeQuery("SELECT requestNumber, fk_simId from userRequests WHERE requestNumber=?", [requestNumber]))[0];
+            if (!reqnoExists) {
+              return res.status(400).send({ status: 400, message: 'failure', reason: "Request Id error" });
+            }
+          const simExists = (await executeQuery("SELECT deviceId from simDetails WHERE id=?", [reqnoExists.fk_simId]))[0];
+            if (!simExists) {
+              return res.status(400).send({ status: 400, message: 'failure', reason: "Device Id error" });
+            }
+          if (reqnoExists && reqnoExists.requestNumber && reqnoExists.fk_simId) {
+            let headers = {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': 'Basic ' + basicToken
+            } 
+            const tokenDetails = await fetch(authTokenUrl, {
+              method: 'POST',
+              headers: headers
+            });
+            const tokenDetailsData = await tokenDetails.json();
+            if (tokenDetailsData && tokenDetailsData.access_token) {
+              let device = [];
+              device.push(simExists.deviceId)
+              let headers1= {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + tokenDetailsData.access_token
+              }
+              let body_val={ "DeviceId": [device] }
+              const responseData = await fetch(`https://api-stg.trimble.com/t/trimble.com/getframewireless-stg/1.0/sim?State=${stateVal}`, {
+                //const responseData = await fetch(STATE_CHANGE_API, {
+                method: 'POST',
+                body: JSON.stringify(body_val),
+                headers: headers1
+              });
+              const resData = await responseData.json();
+              if (resData && resData.status === 'success') {
+                await executeQuery(
+                  "UPDATE userRequests SET fk_assignedTo=?, fk_requestedState=?, resolution=?, status=?, updateUTC=?, closedDate=? WHERE requestNumber=?;",
+                  [
+                    approvedOrRejectedBy,
+                    state,
+                    resolution,
+                    approveStatus,
+                    new Date(),
+                    new Date(),
+                    requestNumber
+                  ]
+                );
+                //updating resolvedBy name to the notifications
+                await executeQuery(
+                  "UPDATE notifications SET fk_resolvedBy=?, updateUTC=? WHERE fk_userRequestsId=?;",
+                  [
+                    approvedOrRejectedBy,
+                    new Date(),
+                    recordExists.id
+                  ]
+                );
+                const simId = await executeQuery(`SELECT fk_simId FROM userRequests where requestNumber=?;`,[requestNumber]);
+                //updating isRequested field in the simDetials after resolving the userRequests
+                await executeQuery(
+                  "UPDATE simDetails SET isRequested=? WHERE id=?;",
+                  [
+                    0,
+                    simId[0].fk_simId
+                  ]
+                );
+                return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
+              } else {
+                return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid device id dev by dinesh" });
+              }
+            }else throw 'Authentication Failure: Unable to authenticate to device Id api.';
+          }else {
+            return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid device id" });
+          }
+        }else{
+          return res.status(400).send({ status: 400, message: 'failure', reason: "Currently not available" });
+        }
       } else {
         return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid post data" });
       }

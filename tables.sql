@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `simDetails` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `deviceId` varchar(15) NULL,
-  `simNumber` int(20) NOT NULL,
+  `simNumber` varchar(20) NOT NULL,
   `deviceSerialNumber` varchar(20) NOT NULL,
   `imeiNumber` varchar(20) NOT NULL,
   `fk_networkProviderId` bigint(20) NULL,
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `simDetails` (
   `fk_oem` bigint(20) NULL,
   FOREIGN KEY (`fk_oem`) REFERENCES oem(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   `vinMsnNumber` varchar(25) NULL, 
-  `registrationNumber` int(20) NOT NULL,
+  `registrationNumber` varchar(20) NOT NULL,
   `subscriptionStatus` varchar(50) NOT NULL,
   `subscriptionEndDate` DATE,
   `mobileNumber` varchar(18) NOT NULL,
