@@ -444,7 +444,7 @@ module.exports = {
                 );
                 return res.status(200).send({ status: 200, message: 'Success', reason: 'state changed' });
               } else {
-                return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid device id dev by dinesh" });
+                return res.status(400).send({ status: 400, message: 'failure', reason: "Invalid device id" });
               }
             }else throw 'Authentication Failure: Unable to authenticate to device Id api.';
           }else {
