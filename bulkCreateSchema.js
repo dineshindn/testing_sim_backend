@@ -8,10 +8,14 @@ module.exports = {
         },
         'Registration Number': {
             prop: 'registrationNumber',
-            type: Number,
+            type: String,
             required: true
         },
-
+        'Device ID': {
+            prop: 'deviceId',
+            type: String,
+            required: true
+        },
         'Subscription Status': {
             prop: 'subscriptionStatus',
             type: String,
@@ -19,16 +23,6 @@ module.exports = {
         },
         'Sim No': {
             prop: 'simNumber',
-            type: Number,
-            required: true
-        },
-        'Mobile Number': {
-            prop: 'mobileNumber',
-            type: String,
-            required: true
-        },
-        'IMEI Number': {
-            prop: 'imeiNumber',
             type: String,
             required: true
         },
@@ -37,8 +31,13 @@ module.exports = {
             type: String,
             required: true
         },
-        'Device ID': {
-            prop: 'deviceId',
+        'IMEI Number': {
+            prop: 'imeiNumber',
+            type: String,
+            required: true
+        },
+        'Mobile Number': {
+            prop: 'mobileNumber',
             type: String,
             required: true
         },
