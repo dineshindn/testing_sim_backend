@@ -7,7 +7,7 @@ var _ = require('lodash');
 var async = require('async');
 const authTokenUrl = process.env.AUTH_TOKEN_URL;
 const basicToken = process.env.BASIC_TOKEN;
-const getDeviceIdDetailsUrl = process.env.GET_DEVICE_DETAILS_URL
+const getDeviceIdDetailsUrl = process.env.GET_DEVICE_DETAILS_URL;
 
 
 const fetchDeviceIdDetails = async (deviceIds, uid, clientID) => {
@@ -45,28 +45,53 @@ const fetchDeviceIdDetails = async (deviceIds, uid, clientID) => {
 
 const insertIntoSimTable = async (data, next) => {
   try {
-    await executeQuery(
-      "INSERT INTO simDetails (deviceId, simNumber, deviceSerialNumber, imeiNumber, fk_networkProviderId, fk_oem, vinMsnNumber, registrationNumber, subscriptionStatus, subscriptionEndDate, mobileNumber, fk_status, stateChangeDate, dispatchDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        data.deviceId,
-        data.simNumber,
-        data.deviceSerialNumber,
-        data.imeiNumber,
-        data.fk_networkProviderId,
-        data.fk_oem,
-        data.vinMsnNumber,
-        data.registrationNumber,
-        data.subscriptionStatus,
-        data.subscriptionEndDate,
-        data.mobileNumber,
-        data.fk_status,
-        data.stateChangeDate,
-        data.dispatchDate,
-        new Date(),
-        new Date()
-      ]
-    );
-    next();
+    const recordExists = (await executeQuery("SELECT * from simDetails WHERE deviceId=?", [data.deviceId]))[0];
+    if(recordExists){
+      await executeQuery(
+        "UPDATE `simdetails` SET `simNumber` = ?, `deviceSerialNumber` = ?, `imeiNumber` = ?, `fk_networkProviderId` = ?, `fk_oem` = ?, `vinMsnNumber` = ?, `registrationNumber` = ?, `subscriptionStatus` = ?, `subscriptionEndDate` = ?, `mobileNumber` = ?, `fk_status` = ?, `stateChangeDate` = ?, `dispatchDate` = ?, `updateUTC` = ? WHERE `simdetails`.`deviceId` = ?",
+        [
+          data.simNumber,
+          data.deviceSerialNumber,
+          data.imeiNumber,
+          data.fk_networkProviderId,
+          data.fk_oem,
+          data.vinMsnNumber,
+          data.registrationNumber,
+          data.subscriptionStatus,
+          data.subscriptionEndDate,
+          data.mobileNumber,
+          data.fk_status,
+          data.stateChangeDate,
+          data.dispatchDate,
+          new Date(),
+          data.deviceId
+        ]
+      );
+      next();
+    }else{
+      await executeQuery(
+        "INSERT INTO simDetails (deviceId, simNumber, deviceSerialNumber, imeiNumber, fk_networkProviderId, fk_oem, vinMsnNumber, registrationNumber, subscriptionStatus, subscriptionEndDate, mobileNumber, fk_status, stateChangeDate, dispatchDate, insertUTC, updateUTC) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          data.deviceId,
+          data.simNumber,
+          data.deviceSerialNumber,
+          data.imeiNumber,
+          data.fk_networkProviderId,
+          data.fk_oem,
+          data.vinMsnNumber,
+          data.registrationNumber,
+          data.subscriptionStatus,
+          data.subscriptionEndDate,
+          data.mobileNumber,
+          data.fk_status,
+          data.stateChangeDate,
+          data.dispatchDate,
+          new Date(),
+          new Date()
+        ]
+      );
+      next();
+    }
   } catch (err) {
     next();
   }
@@ -81,7 +106,7 @@ module.exports = {
 
         const sampleFile = req.files.file;
         const fileName = Date.now() + "_" + crypto.randomBytes(8).toString("hex") + "_" + sampleFile.name;
-        const filePath = './uploads/' + fileName;
+        const filePath = '../uploads/' + fileName;
         await sampleFile.mv(filePath);
         const { rows, errors } = await readXlsxFile(filePath, { schema: simCreate });
         if (errors && errors.length >= 1) return res.status(400).send({ status: 400, message: 'failure', reason: 'Detials incorrect or missing', error: errors });
