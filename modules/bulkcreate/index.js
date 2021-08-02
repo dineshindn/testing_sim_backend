@@ -8,6 +8,7 @@ var async = require('async');
 const authTokenUrl = process.env.AUTH_TOKEN_URL;
 const basicToken = process.env.BASIC_TOKEN;
 const getDeviceIdDetailsUrl = process.env.GET_DEVICE_DETAILS_URL;
+const fs = require('fs');
 
 
 const fetchDeviceIdDetails = async (deviceIds, uid, clientID) => {
@@ -139,6 +140,7 @@ module.exports = {
             if (err) {
               return res.status(400).send({ status: 400, message: 'failure', reason: "something went wrong while upload", result: { error: err.message } });
             }
+            fs.unlinkSync(filePath);
             return res.status(200).send({ status: 200, message: 'success', result: 'File uploaded successfully' });
           });
         } else return res.status(400).send({ status: 400, reason: 'something went wrong', message: 'failure', reason: 'Invalid VIN number(s)' });
