@@ -1,7 +1,7 @@
 CONFIG = {
   development: {
-    user: "simmanager",
-    password: "admin@2021",
+    user: "root",
+    password: "admin",
     database: "sim_manager_development",
     host: "localhost",
     port: 3306,
