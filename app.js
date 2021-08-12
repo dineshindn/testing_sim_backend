@@ -34,7 +34,7 @@ app.use(json2xls.middleware);
 
 // simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Sim Manager." });
+  res.json({ message: "Welcome to Sim Manager testing." });
 });
 
 // Require our routes into the application.
