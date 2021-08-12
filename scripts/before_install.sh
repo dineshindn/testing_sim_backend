@@ -6,6 +6,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
 nvm install node
 
 
+
 #create our working directory if ot doesnt exist
 DIR="/home/ubuntu/nodejs-express"
 if [ -d "$DIR" ]; then
