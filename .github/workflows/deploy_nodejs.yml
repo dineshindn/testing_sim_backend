@@ -44,7 +44,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-          cd ~/node-github-demo
+          cd ~/var/www/html/tesing_sim_backend
           git pull origin master
           npm install --development
           pm2 restart npm --name "myApp" -- run "start:dev" 
