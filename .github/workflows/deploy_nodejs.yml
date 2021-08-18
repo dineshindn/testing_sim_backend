@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   test:
@@ -45,7 +45,7 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd ~/node-github-demo
-          git pull origin main
+          git pull origin master
           npm install --development
           pm2 restart npm --name "myApp" -- run "start:dev" 
         
