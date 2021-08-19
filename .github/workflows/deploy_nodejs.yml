@@ -24,7 +24,6 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd ~/var/www/html/tesing_sim_backend
-          git pull origin master
-          npm install
-          pm2 restart npm --name "myApp" -- run "start:dev"
+          ls -all
+         
         
