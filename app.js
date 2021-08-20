@@ -34,7 +34,7 @@ app.use(json2xls.middleware);
 
 // simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to backend." });
+  res.json({ message: "Welcome to backend test completed." });
 });
 
 // Require our routes into the application.
