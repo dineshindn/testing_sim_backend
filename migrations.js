@@ -12,7 +12,7 @@ module.exports = (app) => {
             updateUTC TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             email varchar(50) NOT NULL
           ) ENGINE=InnoDB DEFAULT CHARSET=latin1`);
-          console.log("table created"+ result );
+          console.log("table created ...!!"+ result );
     }catch{
         console.log("something error");
     }
