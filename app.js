@@ -7,7 +7,7 @@ const json2xls = require('json2xls');
 const path = require('path');
 const app = express();
 require('dotenv').config()
-
+require('./migrations')(app);
 // Allow files in public folder
 app.use('/api/v1/static', express.static(path.join(__dirname, 'public')));
 
