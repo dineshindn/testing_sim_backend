@@ -3,7 +3,7 @@ const executeQuery = require("./database");
 module.exports = (app) => {
 
     try{
-        const result = query(`CREATE TABLE IF NOT EXISTS test_table1 (
+        const result = executeQuery(`CREATE TABLE IF NOT EXISTS test_table1 (
             id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
             userName varchar(30) NOT NULL,
             uuid varchar(250) NOT NULL,
