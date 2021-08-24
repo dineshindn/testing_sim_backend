@@ -23,7 +23,7 @@ jobs:
         username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         script: |
-          cd ~/var/www/html/tesing_sim_backend
+          cd /var/www/html/tesing_sim_backend
           ls -all
           
          
