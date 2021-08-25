@@ -17,6 +17,6 @@ module.exports = (app) => {
           console.log("table created ...!! "+ result );
     }catch{
         console.log("something error"); 
-    }
+    } 
 
 }
