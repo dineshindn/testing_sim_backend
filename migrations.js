@@ -8,7 +8,7 @@ module.exports = (app) => {
         const result = executeQuery("ALTER TABLE `oem` CHANGE `description` `description` VARCHAR(200)");
           console.log("table created ...!! "+ result );
     }catch{
-        console.log("something error");
+        console.log("something error"); 
     }
 
 }
