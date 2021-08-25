@@ -11,7 +11,7 @@ module.exports = (app) => {
             role tinyint(20) NOT NULL,
             insertUTC TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updateUTC TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            email varchar(50) NOT NULL
+            email varchar(50) NOT NULL 
           ) ENGINE=InnoDB DEFAULT CHARSET=latin1`);
         const result = executeQuery("ALTER TABLE oem ADD test VARCHAR(10) NOT NULL AFTER updateUTC;");
         const result = executeQuery("ALTER TABLE `oem` CHANGE `description` `description` VARCHAR(200)");
