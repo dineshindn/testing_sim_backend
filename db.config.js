@@ -7,14 +7,7 @@ CONFIG = {
     port: 3306,
     connectionLimit : 100
   },
-  test: {
-    user: "root",
-    password: "admin",
-    database: "sim_manager_test",
-    host: "localhost",
-    port: 3306,
-    connectionLimit : 100
-  },
+
   production: {
     user: process.env.SIM_MANAGER_DB_USER,
     password: process.env.SIM_MANAGER_DB_PASSWORD,
